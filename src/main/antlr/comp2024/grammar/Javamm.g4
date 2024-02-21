@@ -8,15 +8,29 @@ EQUALS : '=';
 SEMI : ';' ;
 LCURLY : '{' ;
 RCURLY : '}' ;
+RSQPAREN : '[';
+LSQPAREN : ']';
 LPAREN : '(' ;
 RPAREN : ')' ;
 MUL : '*' ;
+DIV : '/' ;
 ADD : '+' ;
+SUB : '-';
+DOT : '.';
+GT : '>';
+LT : '<';
+AND : '&&';
+NOT : '!';
 
+IMPORT : 'import';
 CLASS : 'class' ;
 INT : 'int' ;
+BOOL : 'boolean';
 PUBLIC : 'public' ;
 RETURN : 'return' ;
+NEW : 'new';
+WHILE : 'while';
+IF : 'if';
 
 INTEGER : [0-9] ;
 ID : [a-zA-Z]+ ;
@@ -24,9 +38,12 @@ ID : [a-zA-Z]+ ;
 WS : [ \t\n\r\f]+ -> skip ;
 
 program
-    : classDecl EOF
+    : (importDecl)* classDecl EOF
     ;
 
+importDecl
+    : IMPORT name+=ID (DOT ID)* SEMI
+    ;
 
 classDecl
     : CLASS name=ID
@@ -59,10 +76,14 @@ stmt
     ;
 
 expr
-    : expr op= MUL expr #BinaryExpr //
+    : op=NOT expr #BinaryExpr//
+    | expr op= MUL expr #BinaryExpr //
+    | expr op= DIV expr #BinaryExpr //
     | expr op= ADD expr #BinaryExpr //
+    | expr op= SUB expr #BinaryExpr //
     | value=INTEGER #IntegerLiteral //
     | name=ID #VarRefExpr //
+
     ;
 
 
