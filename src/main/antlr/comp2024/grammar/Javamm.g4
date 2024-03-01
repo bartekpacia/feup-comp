@@ -44,7 +44,7 @@ MAIN: 'main';
 LENGTH: 'lenght';
 
 INTEGER : [0] | [1-9]+[0-9]* ;
-ID : [a-zA-Z]+ ;
+ID : [a-zA-Z_$][a-zA-Z_$0-9]*;
 WS : [ \t\n\r\f]+ -> skip ;
 COMMENT : '/*' .*? '*/' -> skip ;
 LINE_COMMENT : '//' ~[\r\n]* -> skip ;
@@ -79,10 +79,8 @@ type
     ;
 
 methodDecl locals[boolean isPublic=false]
-    //: (PUBLIC {$isPublic=true;})? type name=ID LPAREN param RPAREN LCURLY varDecl* stmt* RETURN expr SEMI RCURLY
     :  ('public')? type methodName=ID '(' (param (',' param)* )? ')' '{'(varDecl)* (stmt)* 'return' expr ';' '}'
-    | (PUBLIC {$isPublic=true;})? STATIC VOID MAIN LPAREN STRING RSQPAREN LSQPAREN name=ID RPAREN RCURLY varDecl* stmt* LCURLY
-    // | ('public')? 'static' 'void' 'main' '(' 'String' '[' ']' parameterName=ID ')' '{'(varDecl)* (stmt)* '}' //#MainMethod
+    | ('public')? 'static' 'void' 'main' '(' 'String' '[' ']' parameterName=ID ')' '{'(varDecl)* (stmt)* '}' //#MainMethod
     ;
 
 param
@@ -92,35 +90,46 @@ param
 
 stmt
     : LCURLY stmt* RCURLY #CurlyStmt//
-    //| IF LPAREN expr RPAREN stmt ELSE stmt #IfStmt //  a substitutir com o que escrebo na linha abaixo
-    | 'if' '(' expr ')' stmt 'else' stmt #IfElseStmt
-    | WHILE LPAREN expr RPAREN stmt #WhileStmt //
-    | expr SEMI #ExprStmt //
-    | expr EQUALS expr SEMI #AssignStmt //
-    | expr LSQPAREN expr RSQPAREN EQUALS expr SEMI #AssignStmt //
-    | RETURN expr SEMI #ReturnStmt
-    //| 'if''Stmt1'SEMI #NestesIf
+    |  '{' '}'   #BlankExpression
+    | ifStatment elseStatment? #IfElseStmt
+    | 'while' '(' expr ')' stmt #WhileStmt
+    | expr ';' stmt #ExpressionStmt
+    | expr ';' #ExpressionStmt
+    | id=ID '=' expr ';' #Assignment
+    | id=ID '[' expr ']' '=' expr ';' #Assignment
+    ;
 
-
+ifStatment
+    : 'if' '(' expr ')' stmt
+    ;
+elseStatment
+    : 'else' stmt
     ;
 
 
 expr
     : LPAREN expr RPAREN #ParenExpr //
     | expr LSQPAREN expr RSQPAREN #ArrRefExpr //
-    | LSQPAREN (expr (COL expr)*)? RSQPAREN #ArrRefExpr //
-    //| expr DOT length=LENGTH #LenCheckExpr //
-    | expr 'a.length' #LenCheckExpr
-    | expr DOT name=ID RPAREN (expr (COL expr)*)? LPAREN #IdUseExpr //
+    | RSQPAREN (expr (COL expr)*)? LSQPAREN #ArrRefExpr //
+    | expr DOT 'length' #LenCheckExpr
+    | expr DOT name=ID LPAREN (expr (COL expr)*)? RPAREN #IdUseExpr //
     | op=NOT expr #BinaryExpr //
-    | expr op=MUL expr #BinaryExpr | expr op=DIV expr #BinaryExpr //
-    | expr op=ADD expr #BinaryExpr | expr op=SUB expr #BinaryExpr //
-    | expr op=AND expr #BoolExpr //
-    | expr op=GT expr #RelExpr | expr op=LT expr #RelExpr //
+    | expr (op='*' | op='/' ) expr  #BinaryOp //mudei aqui
+    | expr (op='+' | op='-' ) expr #BinaryOp //mudei aqui
+    | expr (op='<'| op='>' ) expr #BoolOp  //mudei aqui
+    | expr op = '&&' expr #AndOp //mudei aqui
+    | expr op =  '||' expr #OrOp //mudei aqui
+    | expr '[' expr ']' #ArrayIndex
     | value=INTEGER #IntegerLiteral //
-    | name=ID #VarRefExpr | name=THIS #VarRefExpr//
-    | NEW INT LSQPAREN expr RSQPAREN #NewExpr | NEW name=ID RPAREN LPAREN #NewExpr//
-    | TRUE #BoolExpr | FALSE #BoolExpr | THIS #ThisExpr | name=ID #IDExpr | INT #INTExpr
+    | id = ID #Identifier
+    | name=THIS #VarRefExpr//
+    | 'new' 'int' '[' expr ']' #NewIntArr
+    | 'new' id = ID '(' ')'  #NewClass
+    | TRUE #BoolExpr
+    | FALSE #BoolExpr
+    | THIS #ThisExpr
+    | name=ID #IDExpr
+    | INT #INTExpr
     ;
 
 
