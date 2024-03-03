@@ -17,6 +17,7 @@ public class JmmSymbolTableBuilder {
     public static JmmSymbolTable build(JmmNode root) {
         List<String> imports = new ArrayList<>();
         String className = "";
+        String extendedName = "";
         List<String> methods = new ArrayList<>();
         Map <String, Type> returnTypes = new HashMap<>();
         Map <String, List<Symbol>> params = new HashMap<>();
@@ -25,6 +26,7 @@ public class JmmSymbolTableBuilder {
         for (var childNode : root.getChildren()) {
             if(Kind.CLASS_DECL.check(childNode)) {
                 className = childNode.get("name");
+                extendedName = childNode.getOptional("mainc").orElse("");
                 methods = buildMethods(childNode);
                 returnTypes = buildReturnTypes(childNode);
                 params = buildParams(childNode);
@@ -34,7 +36,7 @@ public class JmmSymbolTableBuilder {
                 imports.add(buildImports(childNode));
             }
         }
-        return new JmmSymbolTable(imports, className, methods, returnTypes, params, locals);
+        return new JmmSymbolTable(imports, className, extendedName, methods, returnTypes, params, locals);
     }
 
     private static String buildImports(JmmNode importDecl) {
