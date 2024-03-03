@@ -40,18 +40,7 @@ public class JmmSymbolTable implements SymbolTable {
 
     @Override
     public String getClassName() {
-        return classNam
-
-/*
-        var classDecl = root.getJmmChild(0);
-        SpecsCheck.checkArgument(Kind.CLASS_DECL.check(classDecl), () -> "Expected a class declaration: " + classDecl);
-        String className = classDecl.get("name");
-
-        var methods = buildMethods(classDecl);
-        var returnTypes = buildReturnTypes(classDecl);
-        var params = buildParams(classDecl);
-        var locals = buildLocals(classDecl);
-*/e;
+        return className;
     }
 
     @Override
