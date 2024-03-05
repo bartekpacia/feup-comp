@@ -79,8 +79,8 @@ type
     ;
 
 methodDecl locals[boolean isPublic=false]
-    :  ('public')? type methodName=ID '(' (param (',' param)* )? ')' '{'(varDecl)* (stmt)* 'return' expr ';' '}'
-    | ('public')? 'static' 'void' 'main' '(' 'String' '[' ']' parameterName=ID ')' '{'(varDecl)* (stmt)* '}' //#MainMethod
+    :  ('public'{$isPublic=true;})? type methodName=ID '(' (param (',' param)* )? ')' '{'(varDecl)* (stmt)* 'return' expr ';' '}' # Method
+    | ('public'{$isPublic=true;})? 'static' 'void' 'main' '(' 'String' '[' ']' parameterName=ID ')' '{'(varDecl)* (stmt)* '}' # MainMethod
     ;
 
 param
