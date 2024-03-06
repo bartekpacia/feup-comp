@@ -6,6 +6,7 @@ import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp2024.ast.TypeUtils;
 import pt.up.fe.specs.util.exceptions.NotImplementedException;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -51,9 +52,15 @@ public class JmmSymbolTable implements SymbolTable {
         return extendedName;
     }
 
-    @Override
+    @Override //unsure if it works
     public List<Symbol> getFields() {
-        throw new NotImplementedException();
+        List<Symbol> finalSymb = new ArrayList<>();
+        for (List<Symbol> val : locals.values()) {
+            for (Symbol symb : val) {
+                finalSymb.add(symb);
+            }
+        }
+        return finalSymb;
     }
 
     @Override
@@ -63,7 +70,6 @@ public class JmmSymbolTable implements SymbolTable {
 
     @Override
     public Type getReturnType(String methodSignature) {
-        // TODO: Simple implementation that needs to be expanded
         return new Type(TypeUtils.getIntTypeName(), false);
     }
 
