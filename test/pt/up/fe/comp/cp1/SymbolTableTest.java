@@ -26,7 +26,6 @@ public class SymbolTableTest {
         return semantics;
     }
 
-
     /**
      * Test if fields are not being accessed from static methods.
      */
@@ -48,6 +47,10 @@ public class SymbolTableTest {
     public void Fields() {
         var semantics = test("symboltable/MethodsAndFields.jmm", false);
         var fields = semantics.getSymbolTable().getFields();
+        for (var i = 0; i < fields.size(); i++) {
+            System.out.println("field " + i + ": " + fields.get(i).toString());
+        }
+
         assertEquals(3, fields.size());
         var checkInt = 0;
         var checkBool = 0;
@@ -70,7 +73,6 @@ public class SymbolTableTest {
         assertEquals("Field of type int", 1, checkInt);
         assertEquals("Field of type boolean", 1, checkBool);
         assertEquals("Field of type object", 1, checkObj);
-
     }
 
     @Test
@@ -113,7 +115,6 @@ public class SymbolTableTest {
         assertEquals("Method with return type boolean", 1, checkBool);
         assertEquals("Method with return type object", 1, checkObj);
         assertEquals("Method with three arguments", 1, checkAll);
-
 
     }
 
