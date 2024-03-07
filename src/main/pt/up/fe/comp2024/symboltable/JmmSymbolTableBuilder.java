@@ -50,23 +50,37 @@ public class JmmSymbolTableBuilder {
         System.out.println("JmmSymbolTableBuilder: printing root JmmNode");
         System.out.println(classDecl.toTree());
         classDecl.getChildren(METHOD_DECL).stream()
-                .forEach(method -> map.put(method.get("name"), new Type(TypeUtils.getIntTypeName(), false)));
+                .forEach(method -> {
+                    System.out.println("DEBUG: method " + method.get("name") + " has " + method.getChildren().size() + " children");
+                    method.getChildren().stream().forEach(System.out::println);
+                    System.out.println("DEBUG: method " + method.get("name") + " has " + method.getAttributes().size() + " attributes");
+                    method.getAttributes().stream().forEach(System.out::println);
+                    method.getOptional(null);
+                    // final JmmNode typeNode = method.getChildren("Type").get(0);
+                    // final String typeName = typeNode.get("name");
+                    // // TODO(bartek): handle array types
+                    // final Type type = new Type(typeName, false);
+                    map.put(method.get("name"), new Type(TypeUtils.getIntTypeName(), false));
+                });
 
         return map;
     }
 
     private static Map<String, List<Symbol>> buildParams(JmmNode classDecl) {
         Map<String, List<Symbol>> map = new HashMap<>();
-        var intType = new Type(TypeUtils.getIntTypeName(), false);
 
         classDecl.getChildren(METHOD_DECL).stream()
                 .forEach(method -> {
-                    System.out.println("Going over parameters of method " + method.get("name"));
-
                     List<Symbol> parameters = new ArrayList<>();
 
                     method.getChildren("Param").stream()
-                            .forEach(param -> parameters.add(new Symbol(intType, param.get("name"))));
+                            .forEach(param -> {
+                                final JmmNode typeNode = param.getChildren("Type").get(0);
+                                final String typeName = typeNode.get("name");
+                                // TODO(bartek): handle array types
+                                final Type type = new Type(typeName, false);
+                                parameters.add(new Symbol(type, param.get("name")));
+                            });
 
                     map.put(method.get("name"), parameters);
                 });
@@ -101,8 +115,10 @@ public class JmmSymbolTableBuilder {
         return classDecl.getChildren(VAR_DECL).stream()
                 .map(fieldDecl -> {
                     final JmmNode typeNode = fieldDecl.getChildren("Type").get(0);
-                    final String type = typeNode.get("name");
-                    return new Symbol(new Type(type, false), fieldDecl.get("name"));
+                    final String typeName = typeNode.get("name");
+                    // TODO(bartek): handle array types
+                    final Type type = new Type(typeName, false);
+                    return new Symbol(type, fieldDecl.get("name"));
                 })
                 .toList();
     }
