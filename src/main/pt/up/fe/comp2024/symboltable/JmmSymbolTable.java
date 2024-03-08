@@ -4,9 +4,6 @@ import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp2024.ast.TypeUtils;
-import pt.up.fe.specs.util.exceptions.NotImplementedException;
-
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -16,21 +13,31 @@ public class JmmSymbolTable implements SymbolTable {
     private final List<String> imports;
     private final String className;
     private final String extendedName;
+    private final List<Symbol> fields;
     private final List<String> methods;
     private final Map<String, Type> returnTypes;
     private final Map<String, List<Symbol>> params;
+
+    /**
+     * Contains local variables for methods.
+     * Method names are map keys.
+     * Method's local variables are map values.
+     */
     private final Map<String, List<Symbol>> locals;
 
-    public JmmSymbolTable(List<String> imports,
-                          String className,
-                          String extendedName,
-                          List<String> methods,
-                          Map<String, Type> returnTypes,
-                          Map<String, List<Symbol>> params,
-                          Map<String, List<Symbol>> locals) {
+    public JmmSymbolTable(
+            List<String> imports,
+            String className,
+            String extendedName,
+            List<Symbol> fields,
+            List<String> methods,
+            Map<String, Type> returnTypes,
+            Map<String, List<Symbol>> params,
+            Map<String, List<Symbol>> locals) {
         this.imports = imports;
         this.className = className;
         this.extendedName = extendedName;
+        this.fields = fields;
         this.methods = methods;
         this.returnTypes = returnTypes;
         this.params = params;
@@ -52,15 +59,18 @@ public class JmmSymbolTable implements SymbolTable {
         return extendedName;
     }
 
-    @Override //unsure if it works
+    @Override // unsure if it works - it doesn't
     public List<Symbol> getFields() {
-        List<Symbol> finalSymb = new ArrayList<>();
-        for (List<Symbol> val : locals.values()) {
-            for (Symbol symb : val) {
-                finalSymb.add(symb);
-            }
-        }
-        return finalSymb;
+        return Collections.unmodifiableList(fields);
+
+        // TODO: Uncomment or remove
+        // List<Symbol> finalSymb = new ArrayList<>();
+        // for (List<Symbol> val : locals.values()) {
+        // for (Symbol symb : val) {
+        // finalSymb.add(symb);
+        // }
+        // }
+        // return finalSymb;
     }
 
     @Override

@@ -68,7 +68,15 @@ application {
     mainClass = 'pt.up.fe.comp2024.Launcher'
 }
 
-
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+}
+
+test {
+    testLogging {
+        exceptionFormat "full"
+        showExceptions true
+        showCauses true
+        showStackTraces true
+    }
 }
