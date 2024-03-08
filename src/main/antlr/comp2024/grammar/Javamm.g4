@@ -40,7 +40,6 @@ IF : 'if';
 ELSE: 'else';
 STATIC: 'static';
 VOID: 'void';
-MAIN: 'main';
 LENGTH: 'lenght';
 
 INTEGER : [0] | [1-9]+[0-9]* ;
