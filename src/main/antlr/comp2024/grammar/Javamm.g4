@@ -79,7 +79,7 @@ type locals[boolean isArray=false]
 
 methodDecl locals[boolean isPublic=false]
     :  ('public'{$isPublic=true;})? 'static'? typename=type name=ID '(' (param (',' param)* )? ')' '{'(varDecl)* (stmt)* 'return' expr ';' '}' # Method
-    | ('public'{$isPublic=true;})? 'static' typename=type name='main' '(' 'String' '[' ']' parameterName=ID ')' '{'(varDecl)* (stmt)* '}' # MainMethod
+    | ('public'{$isPublic=true;})? 'static' typename=type name=ID '(' 'String' '[' ']' parameterName=ID ')' '{'(varDecl)* (stmt)* '}' # MainMethod
     ;
 
 param
