@@ -83,8 +83,8 @@ methodDecl locals[boolean isPublic=false]
     ;
 
 param
-    : typename=type name=ID
-    | typename=type '... ints'  // para passar o teste da linha 67 // n sei se isto esta certo // esta syntax teria que aceitar diversos argumentos
+    : typename=type '... ints'  // para passar o teste da linha 67 // n sei se isto esta certo // esta syntax teria que aceitar diversos argumentos
+    | typename=type name=ID
     ;
 
 stmt
