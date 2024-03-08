@@ -56,11 +56,14 @@ public class JmmSymbolTableBuilder {
                     System.out.println("DEBUG: method " + method.get("name") + " has " + method.getAttributes().size() + " attributes");
                     method.getAttributes().stream().forEach(System.out::println);
                     method.getOptional(null);
-                    // final JmmNode typeNode = method.getChildren("Type").get(0);
-                    // final String typeName = typeNode.get("name");
+
+                    final JmmNode typeNode = method.getChildren("Type").get(0);
+                    final String typeName = typeNode.get("name");
+                    final boolean isArray = typeNode.get("isArray").equals("true");
                     // // TODO(bartek): handle array types
-                    // final Type type = new Type(typeName, false);
-                    map.put(method.get("name"), new Type(TypeUtils.getIntTypeName(), false));
+
+                    final Type type = new Type(typeName, isArray);
+                    map.put(method.get("name"), type);
                 });
 
         return map;
@@ -78,7 +81,8 @@ public class JmmSymbolTableBuilder {
                                 final JmmNode typeNode = param.getChildren("Type").get(0);
                                 final String typeName = typeNode.get("name");
                                 // TODO(bartek): handle array types
-                                final Type type = new Type(typeName, false);
+                                final boolean isArray = typeNode.get("isArray").equals("true");
+                                final Type type = new Type(typeName, isArray);
                                 parameters.add(new Symbol(type, param.get("name")));
                             });
 
@@ -117,17 +121,17 @@ public class JmmSymbolTableBuilder {
                     final JmmNode typeNode = fieldDecl.getChildren("Type").get(0);
                     final String typeName = typeNode.get("name");
                     // TODO(bartek): handle array types
-                    final Type type = new Type(typeName, false);
+                    final boolean isArray = fieldDecl.getObject("typename",JmmNode.class).get("isArray").equals("true");
+                    final Type type = new Type(typeName, isArray);
                     return new Symbol(type, fieldDecl.get("name"));
                 })
                 .toList();
     }
 
     private static List<Symbol> getLocalsList(JmmNode methodDecl) {
-        var intType = new Type(TypeUtils.getIntTypeName(), false);
 
         return methodDecl.getChildren(VAR_DECL).stream()
-                .map(varDecl -> new Symbol(intType, varDecl.get("name")))
+                .map(varDecl -> new Symbol(new Type(varDecl.getObject("typename",JmmNode.class).get("name"),varDecl.getObject("typename",JmmNode.class).get("isArray").equals("true")), varDecl.get("name")))
                 .toList();
     }
 

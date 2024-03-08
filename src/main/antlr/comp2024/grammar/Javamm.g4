@@ -67,25 +67,25 @@ classDecl
     ;
 
 varDecl
-    : type name=ID SEMI
+    : typename=type name=ID SEMI
     ;
 
 //lacks 1 of them
-type
-    : name=INT RSQPAREN LSQPAREN
-    | name=INT
+type locals[boolean isArray=false]
+    : name=INT (RSQPAREN LSQPAREN{$isArray=true;})?
     | name=BOOL
     | name = ('String' | ID )
+    | name = VOID
     ;
 
 methodDecl locals[boolean isPublic=false]
-    :  ('public'{$isPublic=true;})? type name=ID '(' (param (',' param)* )? ')' '{'(varDecl)* (stmt)* 'return' expr ';' '}' # Method
-    | ('public'{$isPublic=true;})? 'static' 'void' name='main' '(' 'String' '[' ']' parameterName=ID ')' '{'(varDecl)* (stmt)* '}' # MainMethod
+    :  ('public'{$isPublic=true;})? 'static'? typename=type name=ID '(' (param (',' param)* )? ')' '{'(varDecl)* (stmt)* 'return' expr ';' '}' # Method
+    | ('public'{$isPublic=true;})? 'static' typename=type name='main' '(' 'String' '[' ']' parameterName=ID ')' '{'(varDecl)* (stmt)* '}' # MainMethod
     ;
 
 param
-    : type name=ID
-    | type '... ints'  // para passar o teste da linha 67 // n sei se isto esta certo // esta syntax teria que aceitar diversos argumentos
+    : typename=type name=ID
+    | typename=type '... ints'  // para passar o teste da linha 67 // n sei se isto esta certo // esta syntax teria que aceitar diversos argumentos
     ;
 
 stmt
