@@ -72,6 +72,7 @@ varDecl
 //lacks 1 of them
 type locals[boolean isArray=false]
     : name=INT (RSQPAREN LSQPAREN{$isArray=true;})?
+    | name=INT WS? '...'
     | name=BOOL
     | name = ('String' | ID )
     | name = VOID
@@ -83,8 +84,7 @@ methodDecl locals[boolean isPublic=false]
     ;
 
 param
-    : typename=type '... ints'  // para passar o teste da linha 67 // n sei se isto esta certo // esta syntax teria que aceitar diversos argumentos
-    | typename=type name=ID
+    : typename=type name=ID
     ;
 
 stmt
