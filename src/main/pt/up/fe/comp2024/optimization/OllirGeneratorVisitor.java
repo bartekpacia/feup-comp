@@ -129,9 +129,17 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         var name = node.get("name");
         code.append(name);
 
-        // param
-        var paramCode = visit(node.getJmmChild(1));
-        code.append("(" + paramCode + ")");
+        // Generate parameters
+        code.append("(");
+        int nodeIndex = 1;
+        while (node.getJmmChild(nodeIndex).getKind().equals("Param")) {
+            if (nodeIndex != 1) code.append(", ");
+
+            var paramCode = visit(node.getJmmChild(nodeIndex));
+            code.append(paramCode);
+            nodeIndex++;
+        }
+        code.append(")");
 
         // type
         var retType = OptUtils.toOllirType(node.getJmmChild(0));
@@ -140,7 +148,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
 
         // rest of its children stmts
-        var afterParam = 2;
+        var afterParam = nodeIndex + 1;
         for (int i = afterParam; i < node.getNumChildren(); i++) {
             var child = node.getJmmChild(i);
             var childCode = visit(child);
