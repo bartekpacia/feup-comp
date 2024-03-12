@@ -7,6 +7,8 @@ import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp2024.ast.NodeUtils;
 import pt.up.fe.comp2024.ast.TypeUtils;
 
+import java.util.stream.Collectors;
+
 import static pt.up.fe.comp2024.ast.Kind.*;
 
 /**
@@ -34,7 +36,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
     @Override
     protected void buildVisitor() {
-
         addVisit(PROGRAM, this::visitProgram);
         addVisit("ImportDecl", this::visitImport);
         addVisit(CLASS_DECL, this::visitClass);
@@ -132,35 +133,26 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         // Generate parameters
         code.append("(");
-        int nodeIndex = 1;
-        while (node.getJmmChild(nodeIndex).getKind().equals("Param")) {
-            if (nodeIndex != 1) code.append(", ");
+        final String methodSignatureCode = node.getChildrenStream()
+                .filter((childNode) -> childNode.getKind().equals("Param"))
+                .map(this::visit)
+                .collect(Collectors.joining(", "));
+        code.append(methodSignatureCode);
 
-            var paramCode = visit(node.getJmmChild(nodeIndex));
-            code.append(paramCode);
-            nodeIndex++;
-        }
         code.append(")");
 
         // type
-        var retType = OptUtils.toOllirType(node.getJmmChild(0));
+        var retType = OptUtils.toOllirType(node.getChild(0));
         code.append(retType);
         code.append(L_BRACKET);
 
 
         // rest of its children stmts
-        var afterParam = nodeIndex + 1;
-        for (int i = afterParam; i < node.getNumChildren(); i++) {
-            var child = node.getJmmChild(i);
-            var childCode = visit(child);
-            code.append(childCode);
-        }
-//        var afterParam = nodeIndex + 1;
-//        for (int i = afterParam; i < node.getNumChildren(); i++) {
-//            var child = node.getChild(i);
-//            var childCode = visit(child);
-//            code.append(childCode);
-//        }
+        final String methodBodyCode = node.getChildrenStream()
+                .filter((childNode) -> !childNode.getKind().equals("Param"))
+                .map(this::visit)
+                .collect(Collectors.joining());
+        code.append(methodBodyCode);
 
         code.append(R_BRACKET);
         code.append(NL);
