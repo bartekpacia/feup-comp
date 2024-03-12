@@ -36,6 +36,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     protected void buildVisitor() {
 
         addVisit(PROGRAM, this::visitProgram);
+        addVisit("ImportDecl", this::visitImport);
         addVisit(CLASS_DECL, this::visitClass);
         addVisit(METHOD_DECL, this::visitMethodDecl);
         addVisit(PARAM, this::visitParam);
@@ -154,6 +155,12 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             var childCode = visit(child);
             code.append(childCode);
         }
+//        var afterParam = nodeIndex + 1;
+//        for (int i = afterParam; i < node.getNumChildren(); i++) {
+//            var child = node.getChild(i);
+//            var childCode = visit(child);
+//            code.append(childCode);
+//        }
 
         code.append(R_BRACKET);
         code.append(NL);
@@ -167,6 +174,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         StringBuilder code = new StringBuilder();
 
         code.append(table.getClassName());
+
         code.append(L_BRACKET);
 
         code.append(NL);
@@ -198,14 +206,25 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
 
     private String visitProgram(JmmNode node, Void unused) {
-
         StringBuilder code = new StringBuilder();
 
-        node.getChildren().stream()
-                .map(this::visit)
-                .forEach(code::append);
+        JmmNode previousNode = null;
+        for (var childNode : node.getChildren()) {
+            var importsAreOver = previousNode != null
+                    && previousNode.getKind().equals("ImportDecl")
+                    && !childNode.getKind().equals("ImportDecl");
+            if (importsAreOver) {
+                code.append(NL);
+            }
 
+            code.append(visit(childNode));
+            previousNode = childNode;
+        }
         return code.toString();
+    }
+
+    private String visitImport(JmmNode node, Void unused) {
+        return "import " + node.get("ID") + ";\n";
     }
 
     /**
