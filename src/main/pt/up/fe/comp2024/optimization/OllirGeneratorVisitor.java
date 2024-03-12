@@ -221,6 +221,8 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             visit(child);
         }
 
+        System.out.println("defaultVisit: unrecognized node kind " + node.getKind());
+
         return "";
     }
 }
