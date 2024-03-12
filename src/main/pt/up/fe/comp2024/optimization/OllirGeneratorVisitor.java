@@ -187,6 +187,17 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
                 needNl = false;
             }
 
+            if (VAR_DECL.check(child)) {
+                code.append(".field");
+                code.append(SPACE);
+                code.append("public");
+                code.append(SPACE);
+                code.append(child.get("name"));
+                var typeNode = child.getChildren("Type").get(0);
+                code.append(OptUtils.toOllirType(typeNode));
+                code.append(END_STMT);
+            }
+
             code.append(result);
         }
 
