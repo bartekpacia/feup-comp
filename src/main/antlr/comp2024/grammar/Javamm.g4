@@ -66,7 +66,7 @@ classDecl
     ;
 
 varDecl
-    : typename=type name=ID SEMI
+    : type name=ID SEMI
     ;
 
 //lacks 1 of them
@@ -79,12 +79,12 @@ type locals[boolean isArray=false]
     ;
 
 methodDecl locals[boolean isPublic=false]
-    :  ('public'{$isPublic=true;})? 'static'? typename=type name=ID '(' (param (',' param)* )? ')' '{'(varDecl)* (stmt)* retStmt '}' # Method
-    | ('public'{$isPublic=true;})? 'static' typename=type name=ID '(' 'String' '[' ']' parameterName=ID ')' '{'(varDecl)* (stmt)* '}' # MainMethod
+    :  ('public'{$isPublic=true;})? 'static'? type name=ID '(' (param (',' param)* )? ')' '{'(varDecl)* (stmt)* retStmt '}' # Method
+    | ('public'{$isPublic=true;})? 'static' type name=ID '(' 'String' '[' ']' parameterName=ID ')' '{'(varDecl)* (stmt)* '}' # MainMethod
     ;
 
 param
-    : typename=type name=ID
+    : type name=ID
     ;
 
 stmt
