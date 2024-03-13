@@ -59,18 +59,9 @@ public class JmmSymbolTable implements SymbolTable {
         return extendedName;
     }
 
-    @Override // unsure if it works - it doesn't
+    @Override
     public List<Symbol> getFields() {
         return Collections.unmodifiableList(fields);
-
-        // TODO: Uncomment or remove
-        // List<Symbol> finalSymb = new ArrayList<>();
-        // for (List<Symbol> val : locals.values()) {
-        // for (Symbol symb : val) {
-        // finalSymb.add(symb);
-        // }
-        // }
-        // return finalSymb;
     }
 
     @Override
