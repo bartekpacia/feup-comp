@@ -94,8 +94,8 @@ stmt
     | 'while' '(' expr ')' stmt #WhileStmt
     | expr ';' stmt #ExpressionStmt
     | expr ';' #ExpressionStmt
-    | id=ID '=' expr ';' #Assignment
-    | id=ID '[' expr ']' '=' expr ';' #Assignment
+    | id=ID '=' expr ';' #AssignStmt
+    | id=ID '[' expr ']' '=' expr ';' #AssignStmt
     ;
 
 ifStatment
@@ -121,7 +121,7 @@ expr
     | expr '[' expr ']' #ArrayIndex
     | value=INTEGER #IntegerLiteral //
     | id = ID #Identifier
-    | name=THIS #VarRefExpr//
+    | name=THIS #VarRefExpr // TODO: Rename to e.g. classFieldRef
     | 'new' 'int' '[' expr ']' #NewIntArr
     | 'new' id = ID '(' ')'  #NewClass
     | TRUE #BoolExpr
@@ -135,6 +135,3 @@ expr
 retStmt
     : RETURN expr ';' # ReturnStmt
     ;
-
-
-
