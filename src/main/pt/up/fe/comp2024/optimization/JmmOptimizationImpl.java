@@ -14,9 +14,6 @@ public class JmmOptimizationImpl implements JmmOptimization {
         var visitor = new OllirGeneratorVisitor(semanticsResult.getSymbolTable());
         var ollirCode = visitor.visit(semanticsResult.getRootNode());
 
-//        System.out.print("\n\n---\nOLLIR code:\n\n");
-//        System.out.println(ollirCode);
-
         return new OllirResult(semanticsResult, ollirCode, Collections.emptyList());
     }
 
