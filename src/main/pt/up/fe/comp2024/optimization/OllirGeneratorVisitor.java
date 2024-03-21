@@ -42,24 +42,25 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         addVisit(METHOD_DECL, this::visitMethodDecl);
         addVisit(PARAM, this::visitParam);
         addVisit(RETURN_STMT, this::visitReturn);
+        // addVisit(VAR_DECL, this::visitVarDecl);
         addVisit(ASSIGN_STMT, this::visitAssignStmt);
 
         setDefaultVisit(this::defaultVisit);
     }
 
-
     private String visitAssignStmt(JmmNode node, Void unused) {
+        System.out.println("Recognized node kind " + node.getKind());
 
         // var lhs = exprVisitor.visit(node.getJmmChild(0));
         var lhs = node.get("id");
-        System.out.println("DEBUG: id is: " + lhs);
+//        System.out.println("DEBUG: id is: " + lhs);
         var rhs = exprVisitor.visit(node.getJmmChild(0));
 
         StringBuilder code = new StringBuilder();
 
         // code to compute the children
-        code.append(lhs);
-        code.append(rhs.getComputation());
+//        code.append(lhs);
+//        code.append(rhs.getComputation());
 
         // code to compute self
         // statement has type of lhs
