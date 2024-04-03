@@ -49,23 +49,24 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     }
 
     private String visitAssignStmt(JmmNode node, Void unused) {
-        System.out.println("Recognized node kind " + node.getKind());
+        var lhs = node.get("id");
+        var rhs = exprVisitor.visit(node.getChild(0));
 
-        var lhs = exprVisitor.visit(node.getJmmChild(0));
-        var rhs = exprVisitor.visit(node.getJmmChild(1));
+        System.out.println("Recognized node kind " + node.getKind() + " with id " + lhs);
+        // var rhs = exprVisitor.visit(node.getJmmChild(1));
 
         StringBuilder code = new StringBuilder();
 
-        code.append(lhs.getComputation());
-        code.append(rhs.getComputation());
+        // code.append(lhs.getComputation());
+        // code.append(rhs.getComputation());
 
         // code to compute self
         // statement has type of lhs
-        Type thisType = TypeUtils.getExprType(node.getJmmChild(0), table);
+        Type thisType = TypeUtils.getExprType(node.getChild(0), table);
         String typeString = OptUtils.toOllirType(thisType);
 
-
-        code.append(lhs.getCode());
+        code.append(lhs);
+        code.append(typeString);
         code.append(SPACE);
 
         code.append(ASSIGN);
