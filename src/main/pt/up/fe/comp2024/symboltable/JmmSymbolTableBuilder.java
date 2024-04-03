@@ -27,7 +27,7 @@ public class JmmSymbolTableBuilder {
         for (var childNode : root.getChildren()) {
             if (Kind.CLASS_DECL.check(childNode)) {
                 className = childNode.get("name");
-                extendedName = childNode.getOptional("mainc").orElse("");
+                extendedName = childNode.getOptional("superClass").orElse("");
                 methods = buildMethods(childNode);
                 fields = buildFields(childNode);
                 returnTypes = buildReturnTypes(childNode);

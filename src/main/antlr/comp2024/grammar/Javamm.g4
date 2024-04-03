@@ -59,7 +59,7 @@ importDecl
     ;
 
 classDecl
-    : CLASS name=ID (EXTENDS mainc=ID)?
+    : CLASS name=ID (EXTENDS superClass=ID)?
         LCURLY
         varDecl* methodDecl*
         RCURLY
