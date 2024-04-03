@@ -88,8 +88,7 @@ param
     ;
 
 stmt
-    : LCURLY stmt* RCURLY #CurlyStmt//
-    |  '{' '}'   #BlankExpression
+    : LCURLY stmt* RCURLY #CurlyStmt
     | ifStatment elseStatment #IfElseStmt
     | 'while' '(' expr ')' stmt #WhileStmt
     | expr ';' stmt #ExpressionStmt
