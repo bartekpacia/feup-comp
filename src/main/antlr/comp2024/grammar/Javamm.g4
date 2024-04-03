@@ -59,7 +59,7 @@ importDecl
     ;
 
 classDecl
-    : CLASS name=ID (EXTENDS mainc=ID)?
+    : CLASS name=ID (EXTENDS superClass=ID)?
         LCURLY
         varDecl* methodDecl*
         RCURLY
@@ -88,8 +88,7 @@ param
     ;
 
 stmt
-    : LCURLY stmt* RCURLY #CurlyStmt//
-    |  '{' '}'   #BlankExpression
+    : LCURLY stmt* RCURLY #CurlyStmt
     | ifStatment elseStatment #IfElseStmt
     | 'while' '(' expr ')' stmt #WhileStmt
     | expr ';' stmt #ExpressionStmt
