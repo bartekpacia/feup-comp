@@ -35,6 +35,7 @@ public class Launcher {
         TestUtils.noErrors(parserResult.getReports());
 
         // Print AST
+        System.out.println("\n---ROOT JMM NODE (AST)---\n");
         System.out.println(parserResult.getRootNode().toTree());
 
         // Semantic Analysis stage
@@ -42,7 +43,7 @@ public class Launcher {
         JmmSemanticsResult semanticsResult = sema.semanticAnalysis(parserResult);
         TestUtils.noErrors(semanticsResult.getReports());
 
-        System.out.println("\nSYMBOL TABLE:\n");
+        System.out.println("\n---SYMBOL TABLE---\n");
         System.out.println(semanticsResult.getSymbolTable().print());
 
         // Optimization stage
@@ -51,7 +52,8 @@ public class Launcher {
         TestUtils.noErrors(ollirResult.getReports());
 
         // Print OLLIR code
-        // System.out.println(ollirResult.getOllirCode());
+        System.out.println("\n---OLLIR CODE---\n");
+        System.out.println(ollirResult.getOllirCode());
 
         // Code generation stage
         JasminBackendImpl jasminGen = new JasminBackendImpl();
