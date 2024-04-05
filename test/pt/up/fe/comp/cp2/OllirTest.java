@@ -3,12 +3,14 @@ package pt.up.fe.comp.cp2;
 import org.junit.Test;
 import org.specs.comp.ollir.*;
 import pt.up.fe.comp.TestUtils;
+import pt.up.fe.comp.jmm.jasmin.JasminResult;
 import pt.up.fe.specs.util.SpecsIo;
 
 import java.io.File;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.junit.Assert.*;
@@ -38,14 +40,13 @@ public class OllirTest {
     }
 
     public static void testJmmCompilation(String resource, Consumer<ClassUnit> ollirTester, String executionOutput) {
-
         // If AstToJasmin pipeline, generate Jasmin
         if (TestUtils.hasAstToJasminClass()) {
 
             var result = TestUtils.backend(SpecsIo.getResource(resource));
 
             var testName = new File(resource).getName();
-            System.out.println(testName + ":\n" + result.getJasminCode());
+            printFilename(testName, result.getJasminCode());
             var runOutput = result.runWithFullOutput();
             assertEquals("Error while running compiled Jasmin: " + runOutput.getOutput(), 0,
                     runOutput.getReturnValue());
@@ -60,11 +61,15 @@ public class OllirTest {
 
         var result = TestUtils.optimize(SpecsIo.getResource(resource));
         var testName = new File(resource).getName();
-        System.out.println(testName + ":\n" + result.getOllirCode());
+        printFilename(testName, result.getOllirCode());
 
         if (ollirTester != null) {
             ollirTester.accept(result.getOllirClass());
         }
+    }
+
+    private static void printFilename(String testFileName, String code) {
+        System.out.println("\n---\n" + testFileName + "\n---\n" + code);
     }
 
     public static void testJmmCompilation(String resource, Consumer<ClassUnit> ollirTester) {
