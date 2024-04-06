@@ -29,9 +29,21 @@ public class TypeUtils {
         Type type = switch (kind) {
             case BINARY_EXPR -> getBinExprType(expr);
             case VAR_REF_EXPR -> getVarExprType(expr, table);
-            case INTEGER_LITERAL -> new Type(INT_TYPE_NAME, false);
+            case INTEGER_LITERAL -> {
+                final String value = expr.get("value");
+                final String debugPrefix = "DEBUG getExprType(INTEGER_LITERAL " + value + "): ";
+                System.out.println(debugPrefix);
+
+
+                final Type retType = new Type(INT_TYPE_NAME, false);
+                System.out.println(debugPrefix + "yield type " + retType.toString());
+                yield retType;
+            }
             case IDENTIFIER -> {
-                System.out.println("getExprType() for identifier " + expr.get("id"));
+                final String ident = expr.get("id");
+
+                final String debugPrefix = "DEBUG getExprType(IDENTIFIER " + ident + "): ";
+                System.out.println(debugPrefix);
 
                 var methodName = expr.getParent().getParent().get("name");
                 var locals = new ArrayList<Symbol>();
@@ -40,14 +52,17 @@ public class TypeUtils {
 
                 Type localType = null;
                 for (var local : locals) {
-                    System.out.println("Found local " + local.getName() + " in method " + methodName);
-                    if (local.getName().equals(expr.get("id"))) {
-                        System.out.println("Found matching local " + local.getName() +
-                                " with type " + local.getType());
+                    System.out.print(debugPrefix + "Found local " + local.getName() + " in method " + methodName + " with type " + local.getType().getName());
+                    if (local.getName().equals(ident)) {
+                        System.out.println(" - MATCH");
                         localType = local.getType();
                         break;
+                    } else {
+                        System.out.println(" - NO MATCH");
                     }
                 }
+
+                System.out.println(debugPrefix + "yield type " + localType.toString());
                 yield localType;
                 // var symbol = table.getSymbol(identifier);
                 // return symbol.getType();

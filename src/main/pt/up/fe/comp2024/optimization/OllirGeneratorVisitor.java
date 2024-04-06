@@ -50,10 +50,11 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
     private String visitAssignStmt(JmmNode node, Void unused) {
         var lhs = node.get("id");
-        var rhs = exprVisitor.visit(node.getChild(0));
+        final String debugPrefix = "DEBUG visitAssignStmt(" + lhs + "): ";
+        System.out.println(debugPrefix + "Recognized node kind " + node.getKind() + " with id " + lhs);
 
-        System.out.println("Recognized node kind " + node.getKind() + " with id " + lhs);
-        // var rhs = exprVisitor.visit(node.getJmmChild(1));
+        var rhs = exprVisitor.visit(node.getChild(0));
+        System.out.println(debugPrefix + "Recognized rhs: " + rhs);
 
         StringBuilder code = new StringBuilder();
 
@@ -251,7 +252,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             visit(child);
         }
 
-        System.out.println("defaultVisit: unrecognized node kind " + node.getKind());
+        System.out.println("DEBUG: defaultVisit: unrecognized node kind " + node.getKind());
 
         return "";
     }

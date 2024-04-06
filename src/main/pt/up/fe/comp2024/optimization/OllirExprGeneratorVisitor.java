@@ -15,7 +15,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
 
     private static final String SPACE = " ";
     private static final String ASSIGN = ":=";
-    private final String END_STMT = ";\n";
+    private static final String END_STMT = ";\n";
 
     private final SymbolTable table;
 
@@ -28,6 +28,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         addVisit(VAR_REF_EXPR, this::visitVarRef);
         addVisit(BINARY_EXPR, this::visitBinExpr);
         addVisit(INTEGER_LITERAL, this::visitInteger);
+        addVisit(IDENTIFIER, this::visitIdentifier);
 
         setDefaultVisit(this::defaultVisit);
     }
@@ -80,6 +81,16 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         return new OllirExprResult(code);
     }
 
+    private OllirExprResult visitIdentifier(JmmNode node, Void unused) {
+        var id = node.get("id");
+        Type type = TypeUtils.getExprType(node, table);
+        String ollirType = OptUtils.toOllirType(type);
+
+        String code = id + ollirType;
+
+        return new OllirExprResult(code);
+    }
+
     /**
      * Default visitor. Visits every child node and return an empty result.
      *
@@ -88,6 +99,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
      * @return
      */
     private OllirExprResult defaultVisit(JmmNode node, Void unused) {
+        System.out.println("DEBUG: defaultVisit(" + node.getKind() + "):");
 
         for (var child : node.getChildren()) {
             visit(child);
