@@ -33,7 +33,7 @@ public class TypeUtils {
             case VAR_REF_EXPR -> getVarExprType(expr, table);
             case INTEGER_LITERAL -> {
                 final String value = expr.get("value");
-                final String debugPrefix = "DEBUG getExprType(INTEGER_LITERAL " + value + "): ";
+                final String debugPrefix = "DEBUG TypeUtils.getExprType(INTEGER_LITERAL " + value + "): ";
                 System.out.println(debugPrefix);
 
 
@@ -44,13 +44,24 @@ public class TypeUtils {
             case IDENTIFIER -> {
                 final String ident = expr.get("id");
 
-                final String debugPrefix = "DEBUG getExprType(IDENTIFIER " + ident + "): ";
+                final String debugPrefix = "DEBUG TypeUtils.getExprType(IDENTIFIER " + ident + "): ";
                 System.out.println(debugPrefix);
 
-                var methodName = expr.getParent().getParent().get("name");
+                // Find enclosing method
+                JmmNode methodNode = expr.getParent();
+                String methodName = null;
+                while (methodName == null) {
+                    // System.out.println(debugPrefix + "Checking if " + methodNode + " of kind " + methodNode.getKind() + " is a method node");
+                    if (methodNode.getKind().equals("Method")) {
+                        methodName = methodNode.get("name");
+                    } else {
+                        methodNode = methodNode.getParent();
+                    }
+                }
 
                 Type localType = null;
 
+                // Search for identifier in method's locals
                 var locals = new ArrayList<>(table.getLocalVariables(methodName));
                 for (var local : locals) {
                     System.out.print(debugPrefix + "Found local " + local.getName() + " in method " + methodName + " with type " + local.getType().getName());
@@ -63,6 +74,7 @@ public class TypeUtils {
                     }
                 }
 
+                // Search for identifier in method's parameters
                 var params = new ArrayList<>(table.getParameters(methodName));
                 for (var param : params) {
                     System.out.print(debugPrefix + "Found param " + param.getName() + " in method " + methodName + " with type " + param.getType().getName());

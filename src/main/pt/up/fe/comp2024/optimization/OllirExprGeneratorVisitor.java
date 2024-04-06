@@ -99,7 +99,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
      * @return
      */
     private OllirExprResult defaultVisit(JmmNode node, Void unused) {
-        System.out.println("DEBUG: defaultVisit(" + node.getKind() + "):");
+        System.out.println("DEBUG ExprGenerator.defaultVisit(" + node.getKind() + "):");
 
         for (var child : node.getChildren()) {
             visit(child);
