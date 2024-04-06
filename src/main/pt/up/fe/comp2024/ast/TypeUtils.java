@@ -8,6 +8,8 @@ import java.util.ArrayList;
 
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
 
+import static pt.up.fe.comp2024.ast.Kind.METHOD_DECL;
+
 public class TypeUtils {
 
     private static final String INT_TYPE_NAME = "int";
@@ -47,17 +49,7 @@ public class TypeUtils {
                 final String debugPrefix = "DEBUG TypeUtils.getExprType(IDENTIFIER " + ident + "): ";
                 System.out.println(debugPrefix);
 
-                // Find enclosing method
-                JmmNode methodNode = expr.getParent();
-                String methodName = null;
-                while (methodName == null) {
-                    // System.out.println(debugPrefix + "Checking if " + methodNode + " of kind " + methodNode.getKind() + " is a method node");
-                    if (methodNode.getKind().equals("Method")) {
-                        methodName = methodNode.get("name");
-                    } else {
-                        methodNode = methodNode.getParent();
-                    }
-                }
+                String methodName = expr.getAncestor(METHOD_DECL).map(method -> method.get("name")).orElseThrow();
 
                 Type localType = null;
 
