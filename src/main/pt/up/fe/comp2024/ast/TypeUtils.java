@@ -3,7 +3,9 @@ package pt.up.fe.comp2024.ast;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
+
 import java.util.ArrayList;
+
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
 
 public class TypeUtils {
@@ -46,11 +48,10 @@ public class TypeUtils {
                 System.out.println(debugPrefix);
 
                 var methodName = expr.getParent().getParent().get("name");
-                var locals = new ArrayList<Symbol>();
-                locals.addAll(table.getLocalVariables(methodName));
-                // locals.addAll(table.getParameters(methodName));
 
                 Type localType = null;
+
+                var locals = new ArrayList<>(table.getLocalVariables(methodName));
                 for (var local : locals) {
                     System.out.print(debugPrefix + "Found local " + local.getName() + " in method " + methodName + " with type " + local.getType().getName());
                     if (local.getName().equals(ident)) {
@@ -62,10 +63,20 @@ public class TypeUtils {
                     }
                 }
 
+                var params = new ArrayList<>(table.getParameters(methodName));
+                for (var param : params) {
+                    System.out.print(debugPrefix + "Found param " + param.getName() + " in method " + methodName + " with type " + param.getType().getName());
+                    if (param.getName().equals(ident)) {
+                        System.out.println(" - MATCH");
+                        localType = param.getType();
+                        break;
+                    } else {
+                        System.out.println(" - NO MATCH");
+                    }
+                }
+
                 System.out.println(debugPrefix + "yield type " + localType.toString());
                 yield localType;
-                // var symbol = table.getSymbol(identifier);
-                // return symbol.getType();
             }
             default -> throw new UnsupportedOperationException("Can't compute type for expression kind '" + kind + "'");
         };
@@ -81,7 +92,7 @@ public class TypeUtils {
         return switch (operator) {
             case "+", "*" -> new Type(INT_TYPE_NAME, false);
             default ->
-                throw new RuntimeException("Unknown operator '" + operator + "' of expression '" + binaryExpr + "'");
+                    throw new RuntimeException("Unknown operator '" + operator + "' of expression '" + binaryExpr + "'");
         };
     }
 
