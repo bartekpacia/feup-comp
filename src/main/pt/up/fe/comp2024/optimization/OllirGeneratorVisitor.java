@@ -22,6 +22,8 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     private final String NL = "\n";
     private final String L_BRACKET = " {\n";
     private final String R_BRACKET = "}\n";
+    private final String L_PAREN = "(";
+    private final String R_PAREN = ")";
 
 
     private final SymbolTable table;
@@ -44,8 +46,47 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         addVisit(RETURN_STMT, this::visitReturn);
         // addVisit(VAR_DECL, this::visitVarDecl);
         addVisit(ASSIGN_STMT, this::visitAssignStmt);
+        addVisit(ID_USE_EXPR, this::visitMethodCallExpr);
+        addVisit(EXPRESSION_STMT, this::visitExpression);
 
         setDefaultVisit(this::defaultVisit);
+    }
+
+    private String visitExpression(JmmNode node, Void unused) {
+        return exprVisitor.visit(node.getJmmChild(0)).getCode();
+    }
+
+    private String visitMethodCallExpr(JmmNode node, Void unused) {
+        final String methodName = node.get("name");
+
+        // if (1==1){ return "DUPA"; }
+
+        // TODO: Differentiate between static and virtual method call
+
+        final String debugPrefix = "DEBUG Generator.visitMethodCallExpr(" + methodName + "): ";
+        System.out.println(debugPrefix + "Recognized node kind " + node.getKind());
+
+        final StringBuilder code = new StringBuilder();
+
+        // First child of IdUseExpr is the package where the method comes from
+        final String packageName = node.getChild(0).get("id");
+
+        code.append("invokestatic").append(L_PAREN);
+        code.append(packageName).append(", ");
+        code.append("\"").append(methodName).append("\"").append(", ");
+
+        // Visit more JmmNode children to get the actuals
+        var args = node.getChildrenStream()
+                .skip(2)
+                .map(this::visit)
+                .collect(Collectors.joining(", "));
+
+        code.append(args);
+        code.append(R_PAREN);
+        code.append(R_BRACKET);
+        code.append(END_STMT);
+
+        return code.toString();
     }
 
     private String visitAssignStmt(JmmNode node, Void unused) {
@@ -254,7 +295,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         for (var child : node.getChildren()) {
             visit(child);
         }
-        
+
         return "";
     }
 }
