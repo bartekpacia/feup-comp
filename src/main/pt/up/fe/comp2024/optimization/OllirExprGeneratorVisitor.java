@@ -7,15 +7,12 @@ import pt.up.fe.comp.jmm.ast.PreorderJmmVisitor;
 import pt.up.fe.comp2024.ast.TypeUtils;
 
 import static pt.up.fe.comp2024.ast.Kind.*;
+import static pt.up.fe.comp2024.optimization.OllirTokens.*;
 
 /**
  * Generates OLLIR code from JmmNodes that are expressions.
  */
 public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExprResult> {
-
-    private static final String SPACE = " ";
-    private static final String ASSIGN = ":=";
-    private static final String END_STMT = ";\n";
 
     private final SymbolTable table;
 
@@ -29,6 +26,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         addVisit(BINARY_EXPR, this::visitBinExpr);
         addVisit(INTEGER_LITERAL, this::visitInteger);
         addVisit(IDENTIFIER, this::visitIdentifier);
+        addVisit(ID_USE_EXPR, this::visitMethodCallExpr);
 
         setDefaultVisit(this::defaultVisit);
     }
@@ -89,6 +87,39 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         String code = id + ollirType;
 
         return new OllirExprResult(code);
+    }
+
+    private OllirExprResult visitMethodCallExpr(JmmNode node, Void unused) {
+        final String methodName = node.get("name");
+
+        // if (1==1){ return "DUPA"; }
+
+        // TODO: Differentiate between static and virtual method call
+
+        final String debugPrefix = "DEBUG Generator.visitMethodCallExpr(" + methodName + "): ";
+        System.out.println(debugPrefix + "Recognized node kind " + node.getKind());
+
+        final StringBuilder code = new StringBuilder();
+
+        // First child of IdUseExpr is the package where the method comes from
+        final String packageName = node.getChild(0).get("id");
+
+        code.append("invokestatic").append(L_PAREN);
+        code.append(packageName).append(", ");
+        code.append("\"").append(methodName).append("\"").append(", ");
+
+        // Visit more JmmNode children to get the actuals
+//        var args = node.getChildrenStream()
+//                .skip(2)
+//                .map(this::visit)
+//                .collect(Collectors.joining(", "));
+
+        code.append(/*args*/ "a.i32");
+        code.append(R_PAREN);
+        code.append(".V");  // Return type
+        code.append(END_STMT);
+
+        return new OllirExprResult(code.toString());
     }
 
     /**
