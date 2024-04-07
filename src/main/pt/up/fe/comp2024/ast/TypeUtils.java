@@ -79,6 +79,19 @@ public class TypeUtils {
                     }
                 }
 
+                // Search for identifier in file's imports
+                var imports = new ArrayList<>(table.getImports());
+                for (var imp : imports) {
+                    System.out.print(debugPrefix + "Found import " + imp + " in file");
+                    if (imp.equals(ident)) {
+                        System.out.println(" - MATCH");
+                        localType = new Type(INT_TYPE_NAME, false);
+                        break;
+                    } else {
+                        System.out.println(" - NO MATCH");
+                    }
+                }
+
                 System.out.println(debugPrefix + "yield type " + localType.toString());
                 yield localType;
             }
