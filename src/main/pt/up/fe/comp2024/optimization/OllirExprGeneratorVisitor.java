@@ -92,8 +92,6 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
     private OllirExprResult visitMethodCallExpr(JmmNode node, Void unused) {
         final String methodName = node.get("name");
 
-        // if (1==1){ return "DUPA"; }
-
         // TODO: Differentiate between static and virtual method call
 
         final String debugPrefix = "DEBUG Generator.visitMethodCallExpr(" + methodName + "): ";
@@ -109,14 +107,36 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         code.append("\"").append(methodName).append("\"").append(", ");
 
         // Visit more JmmNode children to get the actuals
-//        var args = node.getChildrenStream()
-//                .skip(2)
-//                .map(this::visit)
-//                .collect(Collectors.joining(", "));
+        var args = node.getChildrenStream().skip(1).map(child -> visit(child).getCode()).collect(Collectors.joining(", "));
 
-        code.append(/*args*/ "a.i32");
+        System.out.println("DEBUG Generator.visitMethodCallExpr(" + methodName + "): args=" + args);
+
+        code.append(args);
         code.append(R_PAREN);
+
+        // Determining the method's return type:
+        //  Case 1. If the method is defined in current file, get its return type from the symbol table
+        //  Case 2. If the method is imported AND the result is assigned to a variable, the method's return type is the variable's type
+        //  Case 3. If the method is imported AND the result is not assigned to a variable, the method's return type is void
+        String returnType = "";
+
+        try {
+            returnType = table.getReturnType(methodName).getName();
+        } catch (NullPointerException ex) {
+            // This is okay. Method is not defined in the current file, so it must be imported.
+
+            // If the result is assigned to a variable, get the variable's type
+            if (node.getParent().getKind().equals(ASSIGN_STMT)) {
+                returnType = TypeUtils.getExprType(node.getParent().getJmmChild(0), table).getName();
+            } else {
+                returnType = "void";
+            }
+        }
+
+
         code.append(".V");  // Return type
+
+
         code.append(END_STMT);
 
         return new OllirExprResult(code.toString());
