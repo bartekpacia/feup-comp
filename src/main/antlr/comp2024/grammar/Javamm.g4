@@ -112,9 +112,9 @@ expr
     | expr DOT 'length' #LenCheckExpr
     | expr DOT name=ID LPAREN (expr (COL expr)*)? RPAREN #IdUseExpr
     | op=NOT expr #BinaryExpr
-    | expr (op='*' | op='/' ) expr  #BinaryOp
-    | expr (op='+' | op='-' ) expr #BinaryOp
-    | expr (op='<'| op='>' ) expr #BoolOp
+    | expr (op='*' | op='/' ) expr  #BinaryExpr
+    | expr (op='+' | op='-' ) expr #BinaryExpr
+    | expr (op='<'| op='>' ) expr #BoolExpr
     | expr op = '&&' expr #AndOp
     | expr op =  '||' expr #OrOp
     | expr '[' expr ']' #ArrayIndex
