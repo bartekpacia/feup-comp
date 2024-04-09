@@ -30,12 +30,11 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     @Override
     protected void buildVisitor() {
         addVisit(PROGRAM, this::visitProgram);
-        addVisit("ImportDecl", this::visitImport);
+        addVisit(IMPORT_DECL, this::visitImport);
         addVisit(CLASS_DECL, this::visitClass);
         addVisit(METHOD_DECL, this::visitMethodDecl);
         addVisit(PARAM, this::visitParam);
         addVisit(RETURN_STMT, this::visitReturn);
-        // addVisit(VAR_DECL, this::visitVarDecl);
         addVisit(ASSIGN_STMT, this::visitAssignStmt);
         addVisit(EXPRESSION_STMT, this::visitExpression);
 
@@ -225,8 +224,8 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         JmmNode previousNode = null;
         for (var childNode : node.getChildren()) {
             var importsAreOver = previousNode != null
-                    && previousNode.getKind().equals("ImportDecl")
-                    && !childNode.getKind().equals("ImportDecl");
+                    && previousNode.getKind().equals(IMPORT_DECL.getNodeName())
+                    && !childNode.getKind().equals(IMPORT_DECL.getNodeName());
             if (importsAreOver) {
                 code.append(NL);
             }
