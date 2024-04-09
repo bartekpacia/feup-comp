@@ -8,14 +8,9 @@ class CompileArithmetic {
         int a;
         int b;
         int c;
-        boolean d;
-        boolean e;
-
-        // d = !e;
 
         a = 1;
         b = 2;
-        c = a + b;
 
         return a + b;
     }
