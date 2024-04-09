@@ -30,13 +30,17 @@ public class OllirTest {
 
     @Test
     public void compileMethodInvocation() {
-        testJmmCompilation("pt/up/fe/comp/cp2/ollir/CompileMethodInvocation.jmm",
-                this::compileMethodInvocation);
+        testJmmCompilation("pt/up/fe/comp/cp2/ollir/CompileMethodInvocation.jmm", this::compileMethodInvocation);
     }
 
     @Test
     public void compileAssignment() {
         testJmmCompilation("pt/up/fe/comp/cp2/ollir/CompileAssignment.jmm", this::compileAssignment);
+    }
+
+    @Test
+    public void compileExtra() {
+        testJmmCompilation("pt/up/fe/comp/cp2/ollir/CompileExtra.jmm", this::compileExtra);
     }
 
     public static void testJmmCompilation(String resource, Consumer<ClassUnit> ollirTester, String executionOutput) {
@@ -185,6 +189,29 @@ public class OllirTest {
         assertTrue("Could not find an assign instruction in method " + methodName, assignInst.isPresent());
 
         assertEquals("Assignment does not have the expected type", ElementType.INT32,
+                assignInst.get().getTypeOfAssign().getTypeOfElement());
+    }
+
+    public void compileExtra(ClassUnit classUnit) {
+        // Test name of the class
+        assertEquals("Class name not what was expected", "CompileExtra", classUnit.getClassName());
+
+        // Test foo
+        var methodName = "bar";
+        Method methodBar = classUnit.getMethods().stream()
+                .filter(method -> method.getMethodName().equals(methodName))
+                .findFirst()
+                .orElse(null);
+
+        assertNotNull("Could not find method " + methodName, methodBar);
+
+        var assignInst = methodBar.getInstructions().stream()
+                .filter(inst -> inst instanceof AssignInstruction)
+                .map(AssignInstruction.class::cast)
+                .findFirst();
+        assertTrue("Could not find an assign instruction in method " + methodName, assignInst.isPresent());
+
+        assertEquals("Assignment does not have the expected type", ElementType.BOOLEAN,
                 assignInst.get().getTypeOfAssign().getTypeOfElement());
     }
 }

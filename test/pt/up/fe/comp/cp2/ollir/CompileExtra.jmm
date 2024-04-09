@@ -1,0 +1,14 @@
+import nonexist;
+
+class CompileExtra {
+
+    public static void main(String[] args) {
+
+    }
+
+    public boolean bar() {
+        boolean a;
+        a = nonexist.baz();
+        return a;
+    }
+}
