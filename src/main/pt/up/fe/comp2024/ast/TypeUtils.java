@@ -44,7 +44,11 @@ public class TypeUtils {
                 yield retType;
             }
             case ID_USE_EXPR -> {
-                // TODO: Hack hack hack :-)
+                // TODO(bartek): Should this just be duplicated with OllirExprGeneratorVisitor#visitMethodCallExpr?
+
+                final String ident = expr.get("id");
+
+                // TODO(bartek): Hack hack hack :-)
                 yield new Type("int", false);
             }
             case IDENTIFIER -> {

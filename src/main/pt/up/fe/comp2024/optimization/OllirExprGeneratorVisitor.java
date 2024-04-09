@@ -8,6 +8,7 @@ import pt.up.fe.comp.jmm.ast.PreorderJmmVisitor;
 import pt.up.fe.comp2024.ast.TypeUtils;
 
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static pt.up.fe.comp2024.ast.Kind.*;
 import static pt.up.fe.comp2024.optimization.OllirTokens.*;
@@ -65,7 +66,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
 
         Type type = TypeUtils.getExprType(node, table);
         computation.append(node.get("op")).append(OptUtils.toOllirType(type)).append(SPACE)
-                .append(rhs.getCode()).append(END_STMT);
+                .append(rhs.getCode());
 
         return new OllirExprResult(code, computation);
     }
@@ -104,7 +105,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
 
         final String methodName = node.get("name");
 
-        // TODO: Differentiate between static and virtual method call
+        // TODO(bartek): Differentiate between static and virtual method call
 
         final String debugPrefix = "DEBUG Generator.visitMethodCallExpr(" + methodName + "): ";
         System.out.println(debugPrefix + "Recognized node kind " + node.getKind());
@@ -114,17 +115,18 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         // First child of IdUseExpr is the package where the method comes from
         final String packageName = node.getChild(0).get("id");
 
-        code.append("invokestatic").append(L_PAREN);
-        code.append(packageName).append(", ");
-        code.append("\"").append(methodName).append("\"").append(", ");
+        final StringBuilder methodInvocationCode = new StringBuilder();
+        {
+            final String leadingCode = "invokestatic" + L_PAREN;
+            methodInvocationCode.append(leadingCode);
 
-        // Visit more JmmNode children to get the actuals
-        var args = node.getChildrenStream().skip(1).map(child -> visit(child).getCode()).collect(Collectors.joining(", "));
+            final Stream<String> leading = Stream.of(packageName, "\"" + methodName + "\"");
+            final Stream<String> args = node.getChildrenStream().skip(1).map(child -> visit(child).getCode()); // Visit more JmmNode children to get the actuals
+            methodInvocationCode.append(Stream.concat(leading, args).collect(Collectors.joining(", ")));
+            methodInvocationCode.append(R_PAREN);
+        }
 
-        System.out.println("DEBUG Generator.visitMethodCallExpr(" + methodName + "): args=" + args);
-
-        code.append(args);
-        code.append(R_PAREN);
+        code.append(methodInvocationCode);
 
         // Determining the method's return type:
         //  Case 1. If the method is defined in current file, get its return type from the symbol table
@@ -139,7 +141,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
 
             final String assignedVariableName = node.getAncestor(ASSIGN_STMT).map(assign -> assign.get("id")).orElse(null);
             if (assignedVariableName != null) {
-                // TODO: Handle class field variables, not only local variables
+                // TODO(bartek): Handle class field variables, not only local variables
                 final Type assignedVariableType = table.getLocalVariables(surroundingMethodName).stream()
                         .filter(var -> var.getName().equals(assignedVariableName))
                         .findFirst()
@@ -153,7 +155,6 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         }
 
         code.append(returnType);
-        code.append(END_STMT);
 
         return new OllirExprResult(code.toString());
     }

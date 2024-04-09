@@ -21,8 +21,8 @@ public enum Kind {
     INTEGER_LITERAL,
     VAR_REF_EXPR,
     IDENTIFIER,
-    ID_USE_EXPR, // TODO: Rename to METHOD_CALL_EXPR
-    EXPRESSION_STMT; // TODO: Rename to EXPR
+    ID_USE_EXPR, // TODO(bartek): Rename to METHOD_CALL_EXPR
+    EXPRESSION_STMT; // TODO(bartek): Rename to EXPR
 
     private static final Set<Kind> STATEMENTS = Set.of(ASSIGN_STMT, RETURN_STMT);
     private static final Set<Kind> EXPRESSIONS = Set.of(BINARY_EXPR, INTEGER_LITERAL, VAR_REF_EXPR);
