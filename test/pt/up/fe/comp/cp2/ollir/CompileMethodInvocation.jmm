@@ -2,9 +2,6 @@ import io;
 
 class CompileMethodInvocation {
 
-    int a;
-    int b;
-
     public static void main(String[] args) {
 
     }

@@ -33,7 +33,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         addVisit("ImportDecl", this::visitImport);
         addVisit(CLASS_DECL, this::visitClass);
         addVisit(METHOD_DECL, this::visitMethodDecl);
-        addVisit(VAR_DECL, this::visitVarDecl);
         addVisit(PARAM, this::visitParam);
         addVisit(RETURN_STMT, this::visitReturn);
         // addVisit(VAR_DECL, this::visitVarDecl);
@@ -123,9 +122,11 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
 
     private String visitMethodDecl(JmmNode node, Void unused) {
+
         StringBuilder code = new StringBuilder(".method ");
 
         boolean isPublic = NodeUtils.getBooleanAttribute(node, "isPublic", "false");
+
         if (isPublic) {
             code.append("public ");
         }
@@ -163,20 +164,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         return code.toString();
     }
 
-    private String visitVarDecl(JmmNode node, Void unused) {
-        StringBuilder code = new StringBuilder();
-
-        code.append(".field");
-        code.append(SPACE);
-        code.append("public");
-        code.append(SPACE);
-        code.append(node.get("name"));
-        var typeNode = node.getChildren("Type").get(0);
-        code.append(OptUtils.toOllirType(typeNode));
-        code.append(END_STMT);
-
-        return code.toString();
-    }
 
     private String visitClass(JmmNode node, Void unused) {
 
@@ -204,9 +191,15 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
                 needNl = false;
             }
 
-            if (VAR_DECL.check(child) && needNl) {
-                code.append(NL);
-                needNl = false;
+            if (VAR_DECL.check(child)) {
+                code.append(".field");
+                code.append(SPACE);
+                code.append("public");
+                code.append(SPACE);
+                code.append(child.get("name"));
+                var typeNode = child.getChildren("Type").get(0);
+                code.append(OptUtils.toOllirType(typeNode));
+                code.append(END_STMT);
             }
 
             code.append(result);
