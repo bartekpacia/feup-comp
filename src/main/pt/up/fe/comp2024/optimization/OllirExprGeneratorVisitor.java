@@ -1,10 +1,13 @@
 package pt.up.fe.comp2024.optimization;
 
+import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.ast.PreorderJmmVisitor;
 import pt.up.fe.comp2024.ast.TypeUtils;
+
+import java.util.stream.Collectors;
 
 import static pt.up.fe.comp2024.ast.Kind.*;
 import static pt.up.fe.comp2024.optimization.OllirTokens.*;
@@ -90,6 +93,11 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
     }
 
     private OllirExprResult visitMethodCallExpr(JmmNode node, Void unused) {
+        final String surroundingMethodName = node
+                .getAncestor(METHOD_DECL)
+                .map(method -> method.get("name"))
+                .orElseThrow();
+
         final String methodName = node.get("name");
 
         // TODO: Differentiate between static and virtual method call
@@ -119,24 +127,28 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         //  Case 2. If the method is imported AND the result is assigned to a variable, the method's return type is the variable's type
         //  Case 3. If the method is imported AND the result is not assigned to a variable, the method's return type is void
         String returnType = "";
-
         try {
             returnType = table.getReturnType(methodName).getName();
         } catch (NullPointerException ex) {
             // This is okay. Method is not defined in the current file, so it must be imported.
+            // If the result of the method call is assigned to a variable, get the variable's type
 
-            // If the result is assigned to a variable, get the variable's type
-            if (node.getParent().getKind().equals(ASSIGN_STMT)) {
-                returnType = TypeUtils.getExprType(node.getParent().getJmmChild(0), table).getName();
+            final String assignedVariableName = node.getAncestor(ASSIGN_STMT).map(assign -> assign.get("id")).orElse(null);
+            if (assignedVariableName != null) {
+                // TODO: Handle class field variables, not only local variables
+                final Type assignedVariableType = table.getLocalVariables(surroundingMethodName).stream()
+                        .filter(var -> var.getName().equals(assignedVariableName))
+                        .findFirst()
+                        .map(Symbol::getType)
+                        .orElseThrow();
+
+                returnType = OptUtils.toOllirType(assignedVariableType);
             } else {
-                returnType = "void";
+                returnType = OptUtils.toOllirType(new Type("void", false));
             }
         }
 
-
-        code.append(".V");  // Return type
-
-
+        code.append(returnType);
         code.append(END_STMT);
 
         return new OllirExprResult(code.toString());

@@ -43,6 +43,10 @@ public class TypeUtils {
                 System.out.println(debugPrefix + "yield type " + retType.toString());
                 yield retType;
             }
+            case ID_USE_EXPR -> {
+                // TODO: Hack hack hack :-)
+                yield new Type("int", false);
+            }
             case IDENTIFIER -> {
                 final String ident = expr.get("id");
 

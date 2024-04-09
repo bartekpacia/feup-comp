@@ -47,11 +47,13 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     }
 
     private String visitAssignStmt(JmmNode node, Void unused) {
-        var lhs = node.get("id");
-        final String debugPrefix = "DEBUG Generator.visitAssignStmt(" + lhs + "): ";
-        System.out.println(debugPrefix + "Recognized node kind " + node.getKind() + " with id " + lhs);
+        final JmmNode expressionNode = node.getChild(0);
 
-        var rhs = exprVisitor.visit(node.getChild(0));
+        final String lhs = node.get("id");
+        final String debugPrefix = "DEBUG Generator.visitAssignStmt(" + lhs + "): ";
+        System.out.println(debugPrefix + "begin");
+
+        final OllirExprResult rhs = exprVisitor.visit(expressionNode);
         System.out.println(debugPrefix + "Recognized rhs: " + rhs);
 
         StringBuilder code = new StringBuilder();
@@ -61,7 +63,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         // code to compute self
         // statement has type of lhs
-        Type thisType = TypeUtils.getExprType(node.getChild(0), table);
+        Type thisType = TypeUtils.getExprType(expressionNode, table);
         String typeString = OptUtils.toOllirType(thisType);
 
         code.append(lhs);
