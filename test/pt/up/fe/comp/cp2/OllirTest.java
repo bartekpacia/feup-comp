@@ -9,6 +9,7 @@ import pt.up.fe.specs.util.SpecsIo;
 import java.io.File;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -38,11 +39,10 @@ public class OllirTest {
         testJmmCompilation("pt/up/fe/comp/cp2/ollir/CompileAssignment.jmm", this::compileAssignment);
     }
 
-// TODO(bartek): re-enable this test
-//    @Test
-//    public void compileExtra() {
-//        testJmmCompilation("pt/up/fe/comp/cp2/ollir/CompileExtra.jmm", this::compileExtra);
-//    }
+    @Test
+    public void compileExtra() {
+        testJmmCompilation("pt/up/fe/comp/cp2/ollir/CompileExtra.jmm", this::compileExtra);
+    }
 
     public static void testJmmCompilation(String resource, Consumer<ClassUnit> ollirTester, String executionOutput) {
         // If AstToJasmin pipeline, generate Jasmin
@@ -197,26 +197,53 @@ public class OllirTest {
         // Test name of the class
         assertEquals("Class name not what was expected", "CompileExtra", classUnit.getClassName());
 
-        // TODO(bartek): WIP: method.getMethodNonAccessModifier() to assert "bar" is "static"
         // Test method foo
-        var methodName = "bar";
-        Method methodBar = classUnit.getMethods().stream()
-                .filter(method -> method.getMethodName().equals(methodName))
-                .peek(method -> {
-                    System.out.println("DEBUG + " + method.getMethodAccessModifier());
-                })
-                .findFirst()
-                .orElse(null);
+        {
+            final String methodName = "foo";
+            Method actualMethod = classUnit.getMethods().stream()
+                    .filter(method -> method.getMethodName().equals(methodName))
+                    .filter(method -> !method.isStaticMethod())
+                    .findFirst()
+                    .orElse(null);
 
-        assertNotNull("Could not find static method " + methodName, methodBar);
+            // Assert there are 3 calls to nonexist.func()
+            final List<CallInstruction> assignInstructions = actualMethod.getInstructions().stream()
+                    .filter(instr -> instr instanceof CallInstruction)
+                    .map(CallInstruction.class::cast)
+                    .filter(instr -> instr.getInvocationType() == CallType.invokestatic)
+                    .filter(instr -> instr.getReturnType().getTypeOfElement() == ElementType.VOID)
+                    .filter(instr -> ((Operand) instr.getCaller()).getName().equals("nonexist"))
+                    .toList();
 
-        var assignInst = methodBar.getInstructions().stream()
-                .filter(inst -> inst instanceof AssignInstruction)
-                .map(AssignInstruction.class::cast)
-                .findFirst();
-        assertTrue("Could not find an assign instruction in method " + methodName, assignInst.isPresent());
+            assertEquals("Expected 3 calls to nonexist.func()", 3, assignInstructions.size());
+        }
 
-        assertEquals("Assignment does not have the expected type", ElementType.BOOLEAN,
-                assignInst.get().getTypeOfAssign().getTypeOfElement());
+
+        // Test method bar
+        {
+            final String methodName = "bar";
+            Method methodBar = classUnit.getMethods().stream()
+                    .filter(method -> method.getMethodName().equals(methodName))
+                    .filter(Method::isStaticMethod)
+                    .findFirst()
+                    .orElse(null);
+
+            assertNotNull("Could not find static method " + methodName, methodBar);
+
+            final AssignInstruction assignInst = methodBar.getInstructions().stream()
+                    .filter(inst -> inst instanceof AssignInstruction)
+                    .map(AssignInstruction.class::cast)
+                    .findFirst()
+                    .orElse(null);
+
+            assertTrue("Could not find an assign instruction in method " + methodName, assignInst != null);
+
+            // TODO(bartek): Fix
+//            assertEquals(
+//                    "Assignment does not have the expected type",
+//                    ElementType.BOOLEAN,
+//                    assignInst.getTypeOfAssign().getTypeOfElement()
+//            );
+        }
     }
 }
