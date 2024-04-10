@@ -91,7 +91,6 @@ stmt
     : LCURLY stmt* RCURLY #CurlyStmt
     | ifStatment elseStatment #IfElseStmt
     | 'while' '(' expr ')' stmt #WhileStmt
-    | expr ';' stmt #ExpressionStmt
     | expr ';' #ExpressionStmt
     | id=ID '=' expr ';' #AssignStmt
     | id=ID '[' expr ']' '=' expr ';' #AssignStmt
