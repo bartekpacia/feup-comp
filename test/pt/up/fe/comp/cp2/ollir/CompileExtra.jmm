@@ -6,9 +6,15 @@ class CompileExtra {
 
     }
 
-    public boolean bar() {
+    public static boolean bar() {
         boolean a;
-        a = nonexist.baz();
+        a = nonexist.func();
+        return a;
+    }
+
+    public boolean baz() {
+        boolean a;
+        a = nonexist.func();
         return a;
     }
 }

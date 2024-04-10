@@ -197,14 +197,18 @@ public class OllirTest {
         // Test name of the class
         assertEquals("Class name not what was expected", "CompileExtra", classUnit.getClassName());
 
-        // Test foo
+        // TODO(bartek): WIP: method.getMethodNonAccessModifier() to assert "bar" is "static"
+        // Test method foo
         var methodName = "bar";
         Method methodBar = classUnit.getMethods().stream()
                 .filter(method -> method.getMethodName().equals(methodName))
+                .peek(method -> {
+                    System.out.println("DEBUG + " + method.getMethodAccessModifier());
+                })
                 .findFirst()
                 .orElse(null);
 
-        assertNotNull("Could not find method " + methodName, methodBar);
+        assertNotNull("Could not find static method " + methodName, methodBar);
 
         var assignInst = methodBar.getInstructions().stream()
                 .filter(inst -> inst instanceof AssignInstruction)

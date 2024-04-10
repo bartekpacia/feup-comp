@@ -78,9 +78,9 @@ type locals[boolean isArray=false]
     | name = VOID
     ;
 
-methodDecl locals[boolean isPublic=false]
-    :  ('public'{$isPublic=true;})? 'static'? type name=ID '(' (param (',' param)* )? ')' '{'(varDecl)* (stmt)* retStmt '}' # Method
-    | ('public'{$isPublic=true;})? 'static' type name=ID '(' 'String' '[' ']' parameterName=ID ')' '{'(varDecl)* (stmt)* '}' # MainMethod
+methodDecl locals[boolean isPublic=false, boolean isStatic=false]
+    :  ('public'{$isPublic=true;})? ('static'{$isStatic=true;})? type name=ID '(' (param (',' param)* )? ')' '{'(varDecl)* (stmt)* retStmt '}' # Method
+    | ('public'{$isPublic=true;})? ('static'{$isStatic=true;})? type name=ID '(' 'String' '[' ']' parameterName=ID ')' '{'(varDecl)* (stmt)* '}' # MainMethod
     ;
 
 param
