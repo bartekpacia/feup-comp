@@ -45,8 +45,7 @@ public class TypeUtils {
             }
             case ID_USE_EXPR -> {
                 // TODO(bartek): Should this just be duplicated with OllirExprGeneratorVisitor#visitMethodCallExpr?
-
-                final String ident = expr.get("id");
+                // final String ident = expr.get("id");
 
                 // TODO(bartek): Hack hack hack :-)
                 yield new Type("int", false);
