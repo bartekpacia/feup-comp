@@ -78,10 +78,6 @@ public class TypeUtils {
             }
             case IDENTIFIER -> {
                 final String ident = expr.get("id");
-
-                final String debugPrefix = "DEBUG   TypeUtils.getExprType(IDENTIFIER " + ident + "): ";
-                System.out.println(debugPrefix);
-
                 final String methodName = expr.getAncestor(METHOD_DECL).map(method -> method.get("name")).orElseThrow();
 
                 Type localType = null;
@@ -89,43 +85,31 @@ public class TypeUtils {
                 // Search for identifier in method's locals
                 final List<Symbol> locals = new ArrayList<>(table.getLocalVariables(methodName));
                 for (final Symbol local : locals) {
-                    System.out.print(debugPrefix + "Found local " + local.getName() + " in method " + methodName + " with type " + local.getType().getName());
                     if (local.getName().equals(ident)) {
-                        System.out.println(" - MATCH");
                         localType = local.getType();
                         break;
-                    } else {
-                        System.out.println(" - NO MATCH");
                     }
                 }
 
                 // Search for identifier in method's parameters
                 final List<Symbol> params = new ArrayList<>(table.getParameters(methodName));
                 for (final Symbol param : params) {
-                    System.out.print(debugPrefix + "Found param " + param.getName() + " in method " + methodName + " with type " + param.getType().getName());
                     if (param.getName().equals(ident)) {
-                        System.out.println(" - MATCH");
                         localType = param.getType();
                         break;
-                    } else {
-                        System.out.println(" - NO MATCH");
                     }
                 }
 
                 // Search for identifier in file's imports
                 final List<String> imports = new ArrayList<>(table.getImports());
                 for (final String imp : imports) {
-                    System.out.print(debugPrefix + "Found import " + imp + " in file");
                     if (imp.equals(ident)) {
-                        System.out.println(" - MATCH");
                         localType = new Type(VOID_TYPE_NAME, false);
                         break;
-                    } else {
-                        System.out.println(" - NO MATCH");
                     }
+
                 }
 
-                System.out.println(debugPrefix + "yield type " + localType.toString());
                 yield localType;
             }
             default -> throw new UnsupportedOperationException("Can't compute type for expression kind '" + kind + "'");
