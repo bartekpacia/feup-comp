@@ -193,10 +193,14 @@ public class JasminGenerator {
     private String generateReturn(ReturnInstruction returnInst) {
         final StringBuilder code = new StringBuilder();
 
-        // TODO: Hardcoded to int return type, needs to be expanded
+        final Element operand = returnInst.getOperand();
+        if (operand != null) {
+            code.append(generators.apply(operand));
+            code.append("ireturn").append(NL);
+        } else {
+            code.append("return");
+        }
 
-        code.append(generators.apply(returnInst.getOperand()));
-        code.append("ireturn").append(NL);
 
         return code.toString();
     }
