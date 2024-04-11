@@ -55,7 +55,6 @@ public class JasminGenerator {
     }
 
     public String build() {
-
         // This way, build is idempotent
         if (code == null) {
             code = generators.apply(ollirResult.getOllirClass());
@@ -64,10 +63,8 @@ public class JasminGenerator {
         return code;
     }
 
-
     private String generateClassUnit(ClassUnit classUnit) {
-
-        var code = new StringBuilder();
+        final StringBuilder code = new StringBuilder();
 
         // generate class name
         var className = ollirResult.getOllirClass().getClassName();
@@ -103,13 +100,11 @@ public class JasminGenerator {
         return code.toString();
     }
 
-
     private String generateMethod(Method method) {
-
         // set method
         currentMethod = method;
 
-        var code = new StringBuilder();
+        final StringBuilder code = new StringBuilder();
 
         // calculate modifier
         var modifier = method.getMethodAccessModifier() != AccessModifier.DEFAULT ?
@@ -141,7 +136,7 @@ public class JasminGenerator {
     }
 
     private String generateAssign(AssignInstruction assign) {
-        var code = new StringBuilder();
+        final StringBuilder code = new StringBuilder();
 
         // generate code for loading what's on the right
         code.append(generators.apply(assign.getRhs()));
@@ -149,11 +144,9 @@ public class JasminGenerator {
         // store value in the stack in destination
         var lhs = assign.getDest();
 
-        if (!(lhs instanceof Operand)) {
+        if (!(lhs instanceof Operand operand)) {
             throw new NotImplementedException(lhs.getClass());
         }
-
-        var operand = (Operand) lhs;
 
         // get register
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
@@ -179,7 +172,7 @@ public class JasminGenerator {
     }
 
     private String generateBinaryOp(BinaryOpInstruction binaryOp) {
-        var code = new StringBuilder();
+        final StringBuilder code = new StringBuilder();
 
         // load values on the left and on the right
         code.append(generators.apply(binaryOp.getLeftOperand()));
@@ -198,7 +191,7 @@ public class JasminGenerator {
     }
 
     private String generateReturn(ReturnInstruction returnInst) {
-        var code = new StringBuilder();
+        final StringBuilder code = new StringBuilder();
 
         // TODO: Hardcoded to int return type, needs to be expanded
 
@@ -207,5 +200,4 @@ public class JasminGenerator {
 
         return code.toString();
     }
-
 }
