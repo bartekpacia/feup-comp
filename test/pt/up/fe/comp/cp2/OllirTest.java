@@ -199,11 +199,11 @@ public class OllirTest {
             final String methodName = "foo";
             Method actualMethod = classUnit.getMethods().stream()
                     .filter(method -> method.getMethodName().equals(methodName))
-                    .filter(method -> !method.isStaticMethod())
+                    .filter(Method::isStaticMethod)
                     .findFirst()
                     .orElse(null);
 
-            assertNotNull("Could not find method " + methodName, actualMethod);
+            assertNotNull("Could not find static method " + methodName, actualMethod);
 
             // Assert there are 3 calls to nonexist.func()
             final List<CallInstruction> assignInstructions = actualMethod.getInstructions().stream()
@@ -223,11 +223,11 @@ public class OllirTest {
             final String methodName = "bar";
             Method actualMethod = classUnit.getMethods().stream()
                     .filter(method -> method.getMethodName().equals(methodName))
-                    .filter(Method::isStaticMethod)
+                    .filter(method -> !method.isStaticMethod())
                     .findFirst()
                     .orElse(null);
 
-            assertNotNull("Could not find static method " + methodName, actualMethod);
+            assertNotNull("Could not find method " + methodName, actualMethod);
 
             final AssignInstruction assignInst = actualMethod.getInstructions().stream()
                     .filter(inst -> inst instanceof AssignInstruction)
@@ -237,12 +237,37 @@ public class OllirTest {
 
             assertNotNull("Could not find an assign instruction in method " + methodName, assignInst);
 
-            // TODO(bartek): Fix
-//            assertEquals(
-//                    "Assignment does not have the expected type",
-//                    ElementType.BOOLEAN,
-//                    assignInst.getTypeOfAssign().getTypeOfElement()
-//            );
+            assertEquals(
+                    "Assignment does not have the expected type",
+                    ElementType.INT32,
+                    assignInst.getTypeOfAssign().getTypeOfElement()
+            );
+        }
+
+        // Test method baz
+        {
+            final String methodName = "baz";
+            Method actualMethod = classUnit.getMethods().stream()
+                    .filter(method -> method.getMethodName().equals(methodName))
+                    .filter(method -> !method.isStaticMethod())
+                    .findFirst()
+                    .orElse(null);
+
+            assertNotNull("Could not find method " + methodName, actualMethod);
+
+            final AssignInstruction assignInst = actualMethod.getInstructions().stream()
+                    .filter(inst -> inst instanceof AssignInstruction)
+                    .map(AssignInstruction.class::cast)
+                    .findFirst()
+                    .orElse(null);
+
+            assertNotNull("Could not find an assign instruction in method " + methodName, assignInst);
+
+            assertEquals(
+                    "Assignment does not have the expected type",
+                    ElementType.BOOLEAN,
+                    assignInst.getTypeOfAssign().getTypeOfElement()
+            );
         }
     }
 }

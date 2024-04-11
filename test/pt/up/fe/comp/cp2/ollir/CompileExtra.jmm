@@ -6,7 +6,7 @@ class CompileExtra {
 
     }
 
-    public int foo() {
+    public static int foo() {
         // Verify that repeated method calls work
 
         int a;
@@ -19,8 +19,8 @@ class CompileExtra {
         return a;
     }
 
-    public static boolean bar() {
-        boolean a;
+    public int bar() {
+        int a;
         a = nonexist.func();
         return a;
     }

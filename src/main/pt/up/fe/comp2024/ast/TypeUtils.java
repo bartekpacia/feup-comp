@@ -8,6 +8,7 @@ import java.util.ArrayList;
 
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
 
+import static pt.up.fe.comp2024.ast.Kind.ASSIGN_STMT;
 import static pt.up.fe.comp2024.ast.Kind.METHOD_DECL;
 
 public class TypeUtils {
@@ -46,11 +47,37 @@ public class TypeUtils {
             case ID_USE_EXPR -> {
                 String methodName = expr.getAncestor(METHOD_DECL).map(method -> method.get("name")).orElseThrow();
 
+                // Determining the method's return type:
+                //  Case 1. If the method is defined in current file, get its return type from the symbol table
+                //  Case 2. If the method is imported AND the result is assigned to a variable, the method's return type is the variable's type
+                //  Case 3. If the method is imported AND the result is not assigned to a variable, the method's return type is void
+                String returnType = "";
+                try {
+                    returnType = table.getReturnType(methodName).getName();
+                } catch (NullPointerException ex) {
+                    // This is okay. Method is not defined in the current file, so it must be imported.
+                    // If the result of the method call is assigned to a variable, get the variable's type
+
+                    final String assignedVariableName = expr.getAncestor(ASSIGN_STMT).map(assign -> assign.get("id")).orElse(null);
+                    if (assignedVariableName != null) {
+                        // TODO(bartek): Handle class field variables, not only local variables
+                        final Type assignedVariableType = table.getLocalVariables(methodName).stream()
+                                .filter(var -> var.getName().equals(assignedVariableName))
+                                .findFirst()
+                                .map(Symbol::getType)
+                                .orElseThrow();
+
+                        returnType = assignedVariableType.getName();
+                    } else {
+                        returnType = "void";
+                    }
+                }
+
                 // TODO(bartek): Should this just be duplicated with OllirExprGeneratorVisitor#visitMethodCallExpr?
                 // final String ident = expr.get("id");
 
                 // TODO(bartek): Hack hack hack :-)
-                yield new Type("int", false);
+                yield new Type(returnType, false);
             }
             case IDENTIFIER -> {
                 final String ident = expr.get("id");
