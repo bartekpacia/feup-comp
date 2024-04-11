@@ -42,7 +42,6 @@ dependencies {
 
 }
 
-
 // Project sources
 sourceSets {
     main {
@@ -66,6 +65,10 @@ sourceSets {
 
 application {
     mainClass = 'pt.up.fe.comp2024.Launcher'
+
+    // On macOS, this prevents Java icon from being added to Dock
+    // and stealing focus when "gradle run" is called
+    applicationDefaultJvmArgs = ["-Dapple.awt.UIElement=true"]
 }
 
 dependencies {
@@ -73,6 +76,10 @@ dependencies {
 }
 
 test {
+    // On macOS, this prevents Java icon from being added to Dock
+    // and stealing focus when "gradle test" is called
+    jvmArgs "-Dapple.awt.UIElement=true"
+
     testLogging {
         exceptionFormat "full"
         showExceptions true

@@ -1,0 +1,39 @@
+import nonexist;
+
+class CompileExtra {
+    int field;
+
+    public static void main(String[] args) {
+
+    }
+
+    public static int foo() {
+        // Verify that repeated method calls work
+
+        int a;
+        a = nonexist.func();
+        nonexist.func();
+        nonexist.func();
+        nonexist.func();
+        a = nonexist.func();
+
+        return a;
+    }
+
+    public int bar() {
+        int a;
+        a = nonexist.func();
+        return a;
+    }
+
+    public boolean baz() {
+        boolean a;
+        a = nonexist.func();
+        return a;
+    }
+
+    public int qux() {
+        field = nonexist.func();
+        return 1;
+    }
+}

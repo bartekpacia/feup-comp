@@ -12,6 +12,8 @@ class CompileMethodInvocation {
         a = 1;
 
         io.println(a);
+        io.println(a);
+        io.println(a);
 
         return 0;
     }

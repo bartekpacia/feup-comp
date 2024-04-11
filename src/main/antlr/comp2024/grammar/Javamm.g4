@@ -78,9 +78,9 @@ type locals[boolean isArray=false]
     | name = VOID
     ;
 
-methodDecl locals[boolean isPublic=false]
-    :  ('public'{$isPublic=true;})? 'static'? type name=ID '(' (param (',' param)* )? ')' '{'(varDecl)* (stmt)* retStmt '}' # Method
-    | ('public'{$isPublic=true;})? 'static' type name=ID '(' 'String' '[' ']' parameterName=ID ')' '{'(varDecl)* (stmt)* '}' # MainMethod
+methodDecl locals[boolean isPublic=false, boolean isStatic=false]
+    :  ('public'{$isPublic=true;})? ('static'{$isStatic=true;})? type name=ID '(' (param (',' param)* )? ')' '{'(varDecl)* (stmt)* retStmt '}' # Method
+    | ('public'{$isPublic=true;})? ('static'{$isStatic=true;})? type name=ID '(' 'String' '[' ']' parameterName=ID ')' '{'(varDecl)* (stmt)* '}' # MainMethod
     ;
 
 param
@@ -91,7 +91,6 @@ stmt
     : LCURLY stmt* RCURLY #CurlyStmt
     | ifStatment elseStatment #IfElseStmt
     | 'while' '(' expr ')' stmt #WhileStmt
-    | expr ';' stmt #ExpressionStmt
     | expr ';' #ExpressionStmt
     | id=ID '=' expr ';' #AssignStmt
     | id=ID '[' expr ']' '=' expr ';' #AssignStmt
@@ -112,9 +111,9 @@ expr
     | expr DOT 'length' #LenCheckExpr
     | expr DOT name=ID LPAREN (expr (COL expr)*)? RPAREN #IdUseExpr
     | op=NOT expr #BinaryExpr
-    | expr (op='*' | op='/' ) expr  #BinaryOp
-    | expr (op='+' | op='-' ) expr #BinaryOp
-    | expr (op='<'| op='>' ) expr #BoolOp
+    | expr (op='*' | op='/' ) expr  #BinaryExpr
+    | expr (op='+' | op='-' ) expr #BinaryExpr
+    | expr (op='<'| op='>' ) expr #BoolExpr
     | expr op = '&&' expr #AndOp
     | expr op =  '||' expr #OrOp
     | expr '[' expr ']' #ArrayIndex

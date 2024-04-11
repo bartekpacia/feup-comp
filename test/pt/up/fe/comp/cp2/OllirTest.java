@@ -8,13 +8,13 @@ import pt.up.fe.specs.util.SpecsIo;
 import java.io.File;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.function.Consumer;
 
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.junit.Assert.*;
 
 public class OllirTest {
-
 
     @Test
     public void compileBasic() {
@@ -28,8 +28,7 @@ public class OllirTest {
 
     @Test
     public void compileMethodInvocation() {
-        testJmmCompilation("pt/up/fe/comp/cp2/ollir/CompileMethodInvocation.jmm",
-                this::compileMethodInvocation);
+        testJmmCompilation("pt/up/fe/comp/cp2/ollir/CompileMethodInvocation.jmm", this::compileMethodInvocation);
     }
 
     @Test
@@ -37,15 +36,19 @@ public class OllirTest {
         testJmmCompilation("pt/up/fe/comp/cp2/ollir/CompileAssignment.jmm", this::compileAssignment);
     }
 
-    public static void testJmmCompilation(String resource, Consumer<ClassUnit> ollirTester, String executionOutput) {
+    @Test
+    public void compileExtra() {
+        testJmmCompilation("pt/up/fe/comp/cp2/ollir/CompileExtra.jmm", this::compileExtra);
+    }
 
+    public static void testJmmCompilation(String resource, Consumer<ClassUnit> ollirTester, String executionOutput) {
         // If AstToJasmin pipeline, generate Jasmin
         if (TestUtils.hasAstToJasminClass()) {
 
             var result = TestUtils.backend(SpecsIo.getResource(resource));
 
             var testName = new File(resource).getName();
-            System.out.println(testName + ":\n" + result.getJasminCode());
+            printFilename(testName, result.getJasminCode());
             var runOutput = result.runWithFullOutput();
             assertEquals("Error while running compiled Jasmin: " + runOutput.getOutput(), 0,
                     runOutput.getReturnValue());
@@ -60,11 +63,15 @@ public class OllirTest {
 
         var result = TestUtils.optimize(SpecsIo.getResource(resource));
         var testName = new File(resource).getName();
-        System.out.println(testName + ":\n" + result.getOllirCode());
+        printFilename(testName, result.getOllirCode());
 
         if (ollirTester != null) {
             ollirTester.accept(result.getOllirClass());
         }
+    }
+
+    private static void printFilename(String testFileName, String code) {
+        System.out.println("\n---\n" + testFileName + "\n---\n" + code);
     }
 
     public static void testJmmCompilation(String resource, Consumer<ClassUnit> ollirTester) {
@@ -181,5 +188,120 @@ public class OllirTest {
 
         assertEquals("Assignment does not have the expected type", ElementType.INT32,
                 assignInst.get().getTypeOfAssign().getTypeOfElement());
+    }
+
+    public void compileExtra(ClassUnit classUnit) {
+        // Test name of the class
+        assertEquals("Class name not what was expected", "CompileExtra", classUnit.getClassName());
+
+        // Test method foo
+        {
+            final String methodName = "foo";
+            Method actualMethod = classUnit.getMethods().stream()
+                    .filter(method -> method.getMethodName().equals(methodName))
+                    .filter(Method::isStaticMethod)
+                    .findFirst()
+                    .orElse(null);
+
+            assertNotNull("Could not find static method " + methodName, actualMethod);
+
+            // Assert there are 3 calls to nonexist.func()
+            final List<CallInstruction> assignInstructions = actualMethod.getInstructions().stream()
+                    .filter(instr -> instr instanceof CallInstruction)
+                    .map(CallInstruction.class::cast)
+                    .filter(instr -> instr.getInvocationType() == CallType.invokestatic)
+                    .filter(instr -> instr.getReturnType().getTypeOfElement() == ElementType.VOID)
+                    .filter(instr -> ((Operand) instr.getCaller()).getName().equals("nonexist"))
+                    .toList();
+
+            assertEquals("Expected 3 calls to nonexist.func()", 3, assignInstructions.size());
+        }
+
+
+        // Test method bar
+        {
+            final String methodName = "bar";
+            Method actualMethod = classUnit.getMethods().stream()
+                    .filter(method -> method.getMethodName().equals(methodName))
+                    .filter(method -> !method.isStaticMethod())
+                    .findFirst()
+                    .orElse(null);
+
+            assertNotNull("Could not find method " + methodName, actualMethod);
+
+            final AssignInstruction assignInst = actualMethod.getInstructions().stream()
+                    .filter(inst -> inst instanceof AssignInstruction)
+                    .map(AssignInstruction.class::cast)
+                    .findFirst()
+                    .orElse(null);
+
+            assertNotNull("Could not find an assign instruction in method " + methodName, assignInst);
+
+            assertEquals(
+                    "Assignment does not have the expected type",
+                    ElementType.INT32,
+                    assignInst.getTypeOfAssign().getTypeOfElement()
+            );
+        }
+
+        // Test method baz
+        {
+            final String methodName = "baz";
+            Method actualMethod = classUnit.getMethods().stream()
+                    .filter(method -> method.getMethodName().equals(methodName))
+                    .filter(method -> !method.isStaticMethod())
+                    .findFirst()
+                    .orElse(null);
+
+            assertNotNull("Could not find method " + methodName, actualMethod);
+
+            final AssignInstruction assignInst = actualMethod.getInstructions().stream()
+                    .filter(inst -> inst instanceof AssignInstruction)
+                    .map(AssignInstruction.class::cast)
+                    .findFirst()
+                    .orElse(null);
+
+            assertNotNull("Could not find an assign instruction in method " + methodName, assignInst);
+
+            assertEquals(
+                    "Assignment does not have the expected type",
+                    ElementType.BOOLEAN,
+                    assignInst.getTypeOfAssign().getTypeOfElement()
+            );
+        }
+
+        // Test method foo
+        {
+            final String methodName = "qux";
+            Method actualMethod = classUnit.getMethods().stream()
+                    .filter(method -> method.getMethodName().equals(methodName))
+                    .filter(method -> !method.isStaticMethod())
+                    .findFirst()
+                    .orElse(null);
+
+            assertNotNull("Could not find method " + methodName, actualMethod);
+
+
+            final CallInstruction callInstr = actualMethod.getInstructions().stream()
+                    .filter(instr -> instr instanceof AssignInstruction)
+                    .map(AssignInstruction.class::cast)
+                    .map(AssignInstruction::getRhs)
+                    .filter(instr -> instr instanceof CallInstruction)
+                    .map(CallInstruction.class::cast)
+                    .filter(instr -> instr.getInvocationType() == CallType.invokestatic)
+                    .peek(instr -> System.out.println("DEBUG 1 :" + instr.toString()))
+                    .filter(instr -> ((Operand) instr.getCaller()).getName().equals("nonexist"))
+                    .peek(instr -> System.out.println("DEBUG 2 :" + instr.toString()))
+                    .findFirst()
+                    .orElse(null);
+
+            assertNotNull("Could not find the right call instruction in method " + methodName, callInstr);
+
+            assertEquals(
+                    "Method call does not have the expected type",
+                    ElementType.INT32,
+                    callInstr.getReturnType().getTypeOfElement()
+            );
+        }
     }
 }
