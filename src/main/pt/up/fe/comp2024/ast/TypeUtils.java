@@ -8,8 +8,7 @@ import java.util.ArrayList;
 
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
 
-import static pt.up.fe.comp2024.ast.Kind.ASSIGN_STMT;
-import static pt.up.fe.comp2024.ast.Kind.METHOD_DECL;
+import static pt.up.fe.comp2024.ast.Kind.*;
 
 public class TypeUtils {
 
@@ -62,13 +61,24 @@ public class TypeUtils {
                     final String assignedVariableName = expr.getAncestor(ASSIGN_STMT).map(assign -> assign.get("id")).orElse(null);
                     if (assignedVariableName != null) {
                         // TODO(bartek): Handle class field variables, not only local variables
-                        String surroundingMethodNname = expr.getAncestor(METHOD_DECL).map(method -> method.get("name")).orElseThrow();
+                        String surroundingMethodName = expr.getAncestor(METHOD_DECL).map(method -> method.get("name")).orElseThrow();
 
-                        final Type assignedVariableType = table.getLocalVariables(surroundingMethodNname).stream()
+                        // Try to find type by looking at local variables
+                        Type assignedVariableType = table.getLocalVariables(surroundingMethodName).stream()
                                 .filter(var -> var.getName().equals(assignedVariableName))
                                 .findFirst()
                                 .map(Symbol::getType)
-                                .orElseThrow();
+                                .orElse(null);
+
+
+                        if (assignedVariableType == null) {
+                            // Try to find type by looking at class fields
+                            assignedVariableType = table.getFields().stream()
+                                    .filter(var -> var.getName().equals(assignedVariableName))
+                                    .findFirst()
+                                    .map(Symbol::getType)
+                                    .orElseThrow();
+                        }
 
                         returnType = assignedVariableType.getName();
                     } else {

@@ -1,6 +1,7 @@
 import nonexist;
 
 class CompileExtra {
+    int field;
 
     public static void main(String[] args) {
 
@@ -29,5 +30,10 @@ class CompileExtra {
         boolean a;
         a = nonexist.func();
         return a;
+    }
+
+    public int qux() {
+        field = nonexist.func();
+        return 1;
     }
 }

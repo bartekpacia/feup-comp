@@ -269,5 +269,39 @@ public class OllirTest {
                     assignInst.getTypeOfAssign().getTypeOfElement()
             );
         }
+
+        // Test method foo
+        {
+            final String methodName = "qux";
+            Method actualMethod = classUnit.getMethods().stream()
+                    .filter(method -> method.getMethodName().equals(methodName))
+                    .filter(method -> !method.isStaticMethod())
+                    .findFirst()
+                    .orElse(null);
+
+            assertNotNull("Could not find method " + methodName, actualMethod);
+
+
+            final CallInstruction callInstr = actualMethod.getInstructions().stream()
+                    .filter(instr -> instr instanceof AssignInstruction)
+                    .map(AssignInstruction.class::cast)
+                    .map(AssignInstruction::getRhs)
+                    .filter(instr -> instr instanceof CallInstruction)
+                    .map(CallInstruction.class::cast)
+                    .filter(instr -> instr.getInvocationType() == CallType.invokestatic)
+                    .peek(instr -> System.out.println("DEBUG 1 :" + instr.toString()))
+                    .filter(instr -> ((Operand) instr.getCaller()).getName().equals("nonexist"))
+                    .peek(instr -> System.out.println("DEBUG 2 :" + instr.toString()))
+                    .findFirst()
+                    .orElse(null);
+
+            assertNotNull("Could not find the right call instruction in method " + methodName, callInstr);
+
+            assertEquals(
+                    "Method call does not have the expected type",
+                    ElementType.INT32,
+                    callInstr.getReturnType().getTypeOfElement()
+            );
+        }
     }
 }
