@@ -14,6 +14,7 @@ import static pt.up.fe.comp2024.ast.Kind.METHOD_DECL;
 public class TypeUtils {
 
     private static final String INT_TYPE_NAME = "int";
+    private static final String VOID_TYPE_NAME = "void";
 
     public static String getIntTypeName() {
         return INT_TYPE_NAME;
@@ -36,7 +37,7 @@ public class TypeUtils {
             case VAR_REF_EXPR -> getVarExprType(expr, table);
             case INTEGER_LITERAL -> {
                 final String value = expr.get("value");
-                final String debugPrefix = "DEBUG TypeUtils.getExprType(INTEGER_LITERAL " + value + "): ";
+                final String debugPrefix = "DEBUG   TypeUtils.getExprType(INTEGER_LITERAL " + value + "): ";
                 System.out.println(debugPrefix);
 
 
@@ -45,7 +46,7 @@ public class TypeUtils {
                 yield retType;
             }
             case ID_USE_EXPR -> {
-                String methodName = expr.getAncestor(METHOD_DECL).map(method -> method.get("name")).orElseThrow();
+                String name = expr.get("name");
 
                 // Determining the method's return type:
                 //  Case 1. If the method is defined in current file, get its return type from the symbol table
@@ -53,7 +54,7 @@ public class TypeUtils {
                 //  Case 3. If the method is imported AND the result is not assigned to a variable, the method's return type is void
                 String returnType = "";
                 try {
-                    returnType = table.getReturnType(methodName).getName();
+                    returnType = table.getReturnType(name).getName();
                 } catch (NullPointerException ex) {
                     // This is okay. Method is not defined in the current file, so it must be imported.
                     // If the result of the method call is assigned to a variable, get the variable's type
@@ -61,7 +62,9 @@ public class TypeUtils {
                     final String assignedVariableName = expr.getAncestor(ASSIGN_STMT).map(assign -> assign.get("id")).orElse(null);
                     if (assignedVariableName != null) {
                         // TODO(bartek): Handle class field variables, not only local variables
-                        final Type assignedVariableType = table.getLocalVariables(methodName).stream()
+                        String surroundingMethodNname = expr.getAncestor(METHOD_DECL).map(method -> method.get("name")).orElseThrow();
+
+                        final Type assignedVariableType = table.getLocalVariables(surroundingMethodNname).stream()
                                 .filter(var -> var.getName().equals(assignedVariableName))
                                 .findFirst()
                                 .map(Symbol::getType)
@@ -73,16 +76,12 @@ public class TypeUtils {
                     }
                 }
 
-                // TODO(bartek): Should this just be duplicated with OllirExprGeneratorVisitor#visitMethodCallExpr?
-                // final String ident = expr.get("id");
-
-                // TODO(bartek): Hack hack hack :-)
                 yield new Type(returnType, false);
             }
             case IDENTIFIER -> {
                 final String ident = expr.get("id");
 
-                final String debugPrefix = "DEBUG TypeUtils.getExprType(IDENTIFIER " + ident + "): ";
+                final String debugPrefix = "DEBUG   TypeUtils.getExprType(IDENTIFIER " + ident + "): ";
                 System.out.println(debugPrefix);
 
                 String methodName = expr.getAncestor(METHOD_DECL).map(method -> method.get("name")).orElseThrow();
@@ -121,7 +120,7 @@ public class TypeUtils {
                     System.out.print(debugPrefix + "Found import " + imp + " in file");
                     if (imp.equals(ident)) {
                         System.out.println(" - MATCH");
-                        localType = new Type(INT_TYPE_NAME, false);
+                        localType = new Type(VOID_TYPE_NAME, false);
                         break;
                     } else {
                         System.out.println(" - NO MATCH");

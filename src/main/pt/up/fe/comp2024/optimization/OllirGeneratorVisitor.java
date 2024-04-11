@@ -26,7 +26,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         exprVisitor = new OllirExprGeneratorVisitor(table);
     }
 
-
     @Override
     protected void buildVisitor() {
         addVisit(PROGRAM, this::visitProgram);
@@ -82,7 +81,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         return code.toString();
     }
 
-
     private String visitReturn(JmmNode node, Void unused) {
         final String debugPrefix = "DEBUG Generator.visitReturn: ";
         System.out.println(debugPrefix + "Recognized node kind " + node.getKind());
@@ -110,7 +108,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         return code.toString();
     }
 
-
     private String visitParam(JmmNode node, Void unused) {
 
         var typeCode = OptUtils.toOllirType(node.getJmmChild(0));
@@ -121,9 +118,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         return code;
     }
 
-
     private String visitMethodDecl(JmmNode node, Void unused) {
-
         StringBuilder code = new StringBuilder(".method ");
 
         boolean isPublic = NodeUtils.getBooleanAttribute(node, "isPublic", "false");
@@ -155,6 +150,9 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         code.append(retType);
         code.append(L_CURLY);
 
+        final String debugPrefix = "DEBUG Generator.visitMethodDecl(), name: " + name + ", returnType: " + node.getChild(0).get("name");
+        System.out.println(debugPrefix);
+
 
         // rest of its children stmts
         final String methodBodyCode = node.getChildrenStream()
@@ -168,7 +166,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         return code.toString();
     }
-
 
     private String visitClass(JmmNode node, Void unused) {
 
@@ -217,12 +214,10 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     }
 
     private String buildConstructor() {
-
         return ".construct " + table.getClassName() + "().V {\n" +
                 "invokespecial(this, \"<init>\").V;\n" +
                 "}\n";
     }
-
 
     private String visitProgram(JmmNode node, Void unused) {
         StringBuilder code = new StringBuilder();
@@ -248,10 +243,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
     /**
      * Default visitor. Visits every child node and return an empty string.
-     *
-     * @param node
-     * @param unused
-     * @return
      */
     private String defaultVisit(JmmNode node, Void unused) {
         System.out.println("DEBUG Generator.defaultVisit(" + node.getKind() + ")");

@@ -1,6 +1,5 @@
 package pt.up.fe.comp2024.optimization;
 
-import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
@@ -28,7 +27,6 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
     protected void buildVisitor() {
         addVisit(VAR_REF_EXPR, this::visitVarRef);
         addVisit(BINARY_EXPR, this::visitBinExpr);
-        // addVisit(BINARY_OP, this::visitBinaryOp);
         addVisit(INTEGER_LITERAL, this::visitInteger);
         addVisit(IDENTIFIER, this::visitIdentifier);
         addVisit(ID_USE_EXPR, this::visitMethodCallExpr);
@@ -71,13 +69,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         return new OllirExprResult(code, computation);
     }
 
-//    private OllirExprResult visitBinaryOp(JmmNode node, Void unused) {
-//        return new OllirExprResult(node.get("op"));
-//    }
-
-
     private OllirExprResult visitVarRef(JmmNode node, Void unused) {
-
         var id = node.get("name");
         Type type = TypeUtils.getExprType(node, table);
         String ollirType = OptUtils.toOllirType(type);
@@ -98,25 +90,24 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
     }
 
     private OllirExprResult visitMethodCallExpr(JmmNode node, Void unused) {
-        final String surroundingMethodName = node
-                .getAncestor(METHOD_DECL)
-                .map(method -> method.get("name"))
-                .orElseThrow();
+        Type type = TypeUtils.getExprType(node, table);
+        String ollirReturnType = OptUtils.toOllirType(type);
 
         final String methodName = node.get("name");
-
-        // TODO(bartek): Differentiate between static and virtual method call
-
-        final String debugPrefix = "DEBUG Generator.visitMethodCallExpr(" + methodName + "): ";
-        System.out.println(debugPrefix + "Recognized node kind " + node.getKind());
-
-        final StringBuilder code = new StringBuilder();
 
         // First child of IdUseExpr is the package where the method comes from
         final String packageName = node.getChild(0).get("id");
 
+        // TODO(bartek): Differentiate between static and virtual method call
+
+        final String debugPrefix = "DEBUG ExprGenerator.visitMethodCallExpr(), name: " + methodName + ", returnType: " + ollirReturnType;
+        System.out.println(debugPrefix);
+
+        final StringBuilder code = new StringBuilder();
+
         final StringBuilder methodInvocationCode = new StringBuilder();
         {
+            // TODO(bartek): Differentiate between static and virtual method call
             final String leadingCode = "invokestatic" + L_PAREN;
             methodInvocationCode.append(leadingCode);
 
@@ -128,43 +119,13 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
 
         code.append(methodInvocationCode);
 
-        // Determining the method's return type:
-        //  Case 1. If the method is defined in current file, get its return type from the symbol table
-        //  Case 2. If the method is imported AND the result is assigned to a variable, the method's return type is the variable's type
-        //  Case 3. If the method is imported AND the result is not assigned to a variable, the method's return type is void
-        String returnType = "";
-        try {
-            returnType = table.getReturnType(methodName).getName();
-        } catch (NullPointerException ex) {
-            // This is okay. Method is not defined in the current file, so it must be imported.
-            // If the result of the method call is assigned to a variable, get the variable's type
-
-            final String assignedVariableName = node.getAncestor(ASSIGN_STMT).map(assign -> assign.get("id")).orElse(null);
-            if (assignedVariableName != null) {
-                // TODO(bartek): Handle class field variables, not only local variables
-                final Type assignedVariableType = table.getLocalVariables(surroundingMethodName).stream()
-                        .filter(var -> var.getName().equals(assignedVariableName))
-                        .findFirst()
-                        .map(Symbol::getType)
-                        .orElseThrow();
-
-                returnType = OptUtils.toOllirType(assignedVariableType);
-            } else {
-                returnType = OptUtils.toOllirType(new Type("void", false));
-            }
-        }
-
-        code.append(returnType);
+        code.append(ollirReturnType);
 
         return new OllirExprResult(code.toString());
     }
 
     /**
      * Default visitor. Visits every child node and return an empty result.
-     *
-     * @param node
-     * @param unused
-     * @return
      */
     private OllirExprResult defaultVisit(JmmNode node, Void unused) {
         System.out.println("DEBUG ExprGenerator.defaultVisit(" + node.getKind() + "):");
