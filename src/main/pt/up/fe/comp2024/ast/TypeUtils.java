@@ -1,14 +1,15 @@
 package pt.up.fe.comp2024.ast;
 
+import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 
 import java.util.ArrayList;
+import java.util.List;
 
-import pt.up.fe.comp.jmm.analysis.table.Symbol;
-
-import static pt.up.fe.comp2024.ast.Kind.*;
+import static pt.up.fe.comp2024.ast.Kind.ASSIGN_STMT;
+import static pt.up.fe.comp2024.ast.Kind.METHOD_DECL;
 
 public class TypeUtils {
 
@@ -21,31 +22,18 @@ public class TypeUtils {
 
     /**
      * Gets the {@link Type} of an arbitrary expression.
-     *
-     * @param expr
-     * @param table
-     * @return
      */
     public static Type getExprType(JmmNode expr, SymbolTable table) {
         // TODO: Simple implementation that needs to be expanded
 
-        var kind = Kind.fromString(expr.getKind());
+        final Kind kind = Kind.fromString(expr.getKind());
 
-        Type type = switch (kind) {
+        return switch (kind) {
             case BINARY_EXPR -> getBinExprType(expr);
             case VAR_REF_EXPR -> getVarExprType(expr, table);
-            case INTEGER_LITERAL -> {
-                final String value = expr.get("value");
-                final String debugPrefix = "DEBUG   TypeUtils.getExprType(INTEGER_LITERAL " + value + "): ";
-                System.out.println(debugPrefix);
-
-
-                final Type retType = new Type(INT_TYPE_NAME, false);
-                System.out.println(debugPrefix + "yield type " + retType.toString());
-                yield retType;
-            }
+            case INTEGER_LITERAL -> new Type(INT_TYPE_NAME, false);
             case ID_USE_EXPR -> {
-                String name = expr.get("name");
+                final String name = expr.get("name");
 
                 // Determining the method's return type:
                 //  Case 1. If the method is defined in current file, get its return type from the symbol table
@@ -94,13 +82,13 @@ public class TypeUtils {
                 final String debugPrefix = "DEBUG   TypeUtils.getExprType(IDENTIFIER " + ident + "): ";
                 System.out.println(debugPrefix);
 
-                String methodName = expr.getAncestor(METHOD_DECL).map(method -> method.get("name")).orElseThrow();
+                final String methodName = expr.getAncestor(METHOD_DECL).map(method -> method.get("name")).orElseThrow();
 
                 Type localType = null;
 
                 // Search for identifier in method's locals
-                var locals = new ArrayList<>(table.getLocalVariables(methodName));
-                for (var local : locals) {
+                final List<Symbol> locals = new ArrayList<>(table.getLocalVariables(methodName));
+                for (final Symbol local : locals) {
                     System.out.print(debugPrefix + "Found local " + local.getName() + " in method " + methodName + " with type " + local.getType().getName());
                     if (local.getName().equals(ident)) {
                         System.out.println(" - MATCH");
@@ -112,8 +100,8 @@ public class TypeUtils {
                 }
 
                 // Search for identifier in method's parameters
-                var params = new ArrayList<>(table.getParameters(methodName));
-                for (var param : params) {
+                final List<Symbol> params = new ArrayList<>(table.getParameters(methodName));
+                for (final Symbol param : params) {
                     System.out.print(debugPrefix + "Found param " + param.getName() + " in method " + methodName + " with type " + param.getType().getName());
                     if (param.getName().equals(ident)) {
                         System.out.println(" - MATCH");
@@ -125,8 +113,8 @@ public class TypeUtils {
                 }
 
                 // Search for identifier in file's imports
-                var imports = new ArrayList<>(table.getImports());
-                for (var imp : imports) {
+                final List<String> imports = new ArrayList<>(table.getImports());
+                for (final String imp : imports) {
                     System.out.print(debugPrefix + "Found import " + imp + " in file");
                     if (imp.equals(ident)) {
                         System.out.println(" - MATCH");
@@ -142,8 +130,6 @@ public class TypeUtils {
             }
             default -> throw new UnsupportedOperationException("Can't compute type for expression kind '" + kind + "'");
         };
-
-        return type;
     }
 
     private static Type getBinExprType(JmmNode binaryExpr) {
