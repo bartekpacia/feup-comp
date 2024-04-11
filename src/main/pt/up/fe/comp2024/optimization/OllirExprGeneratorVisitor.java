@@ -34,14 +34,12 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         setDefaultVisit(this::defaultVisit);
     }
 
-
     private OllirExprResult visitInteger(JmmNode node, Void unused) {
         var intType = new Type(TypeUtils.getIntTypeName(), false);
         String ollirIntType = OptUtils.toOllirType(intType);
         String code = node.get("value") + ollirIntType;
         return new OllirExprResult(code);
     }
-
 
     private OllirExprResult visitBinExpr(JmmNode node, Void unused) {
         var lhs = visit(node.getJmmChild(0));
@@ -80,28 +78,21 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
     }
 
     private OllirExprResult visitIdentifier(JmmNode node, Void unused) {
-        var id = node.get("id");
-        Type type = TypeUtils.getExprType(node, table);
-        String ollirType = OptUtils.toOllirType(type);
-
-        String code = id + ollirType;
-
+        final String id = node.get("id");
+        final Type type = TypeUtils.getExprType(node, table);
+        final String ollirType = OptUtils.toOllirType(type);
+        final String code = id + ollirType;
         return new OllirExprResult(code);
     }
 
     private OllirExprResult visitMethodCallExpr(JmmNode node, Void unused) {
-        Type type = TypeUtils.getExprType(node, table);
-        String ollirReturnType = OptUtils.toOllirType(type);
+        final Type type = TypeUtils.getExprType(node, table);
+        final String returnType = OptUtils.toOllirType(type);
 
         final String methodName = node.get("name");
 
         // First child of IdUseExpr is the package where the method comes from
         final String packageName = node.getChild(0).get("id");
-
-        // TODO(bartek): Differentiate between static and virtual method call
-
-        final String debugPrefix = "DEBUG ExprGenerator.visitMethodCallExpr(), name: " + methodName + ", returnType: " + ollirReturnType;
-        System.out.println(debugPrefix);
 
         final StringBuilder code = new StringBuilder();
 
@@ -118,8 +109,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         }
 
         code.append(methodInvocationCode);
-
-        code.append(ollirReturnType);
+        code.append(returnType);
 
         return new OllirExprResult(code.toString());
     }
@@ -128,13 +118,10 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
      * Default visitor. Visits every child node and return an empty result.
      */
     private OllirExprResult defaultVisit(JmmNode node, Void unused) {
-        System.out.println("DEBUG ExprGenerator.defaultVisit(" + node.getKind() + "):");
-
         for (var child : node.getChildren()) {
             visit(child);
         }
 
         return OllirExprResult.EMPTY;
     }
-
 }

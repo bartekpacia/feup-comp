@@ -50,11 +50,8 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         final JmmNode expressionNode = node.getChild(0);
 
         final String lhs = node.get("id");
-        final String debugPrefix = "DEBUG Generator.visitAssignStmt(" + lhs + "): ";
-        System.out.println(debugPrefix + "begin");
 
         final OllirExprResult rhs = exprVisitor.visit(expressionNode);
-        System.out.println(debugPrefix + "Recognized rhs: " + rhs);
 
         StringBuilder code = new StringBuilder();
 
@@ -82,9 +79,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     }
 
     private String visitReturn(JmmNode node, Void unused) {
-        final String debugPrefix = "DEBUG Generator.visitReturn: ";
-        System.out.println(debugPrefix + "Recognized node kind " + node.getKind());
-
         String methodName = node.getAncestor(METHOD_DECL).map(method -> method.get("name")).orElseThrow();
         Type retType = table.getReturnType(methodName);
 
@@ -109,13 +103,10 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     }
 
     private String visitParam(JmmNode node, Void unused) {
-
         var typeCode = OptUtils.toOllirType(node.getJmmChild(0));
         var id = node.get("name");
 
-        String code = id + typeCode;
-
-        return code;
+        return id + typeCode;
     }
 
     private String visitMethodDecl(JmmNode node, Void unused) {
@@ -149,10 +140,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         var retType = OptUtils.toOllirType(node.getChild(0));
         code.append(retType);
         code.append(L_CURLY);
-
-        final String debugPrefix = "DEBUG Generator.visitMethodDecl(), name: " + name + ", returnType: " + node.getChild(0).get("name");
-        System.out.println(debugPrefix);
-
 
         // rest of its children stmts
         final String methodBodyCode = node.getChildrenStream()
