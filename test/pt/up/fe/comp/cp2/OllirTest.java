@@ -3,7 +3,6 @@ package pt.up.fe.comp.cp2;
 import org.junit.Test;
 import org.specs.comp.ollir.*;
 import pt.up.fe.comp.TestUtils;
-import pt.up.fe.comp.jmm.jasmin.JasminResult;
 import pt.up.fe.specs.util.SpecsIo;
 
 import java.io.File;
@@ -11,13 +10,11 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.junit.Assert.*;
 
 public class OllirTest {
-
 
     @Test
     public void compileBasic() {
@@ -206,6 +203,8 @@ public class OllirTest {
                     .findFirst()
                     .orElse(null);
 
+            assertNotNull("Could not find method " + methodName, actualMethod);
+
             // Assert there are 3 calls to nonexist.func()
             final List<CallInstruction> assignInstructions = actualMethod.getInstructions().stream()
                     .filter(instr -> instr instanceof CallInstruction)
@@ -222,21 +221,21 @@ public class OllirTest {
         // Test method bar
         {
             final String methodName = "bar";
-            Method methodBar = classUnit.getMethods().stream()
+            Method actualMethod = classUnit.getMethods().stream()
                     .filter(method -> method.getMethodName().equals(methodName))
                     .filter(Method::isStaticMethod)
                     .findFirst()
                     .orElse(null);
 
-            assertNotNull("Could not find static method " + methodName, methodBar);
+            assertNotNull("Could not find static method " + methodName, actualMethod);
 
-            final AssignInstruction assignInst = methodBar.getInstructions().stream()
+            final AssignInstruction assignInst = actualMethod.getInstructions().stream()
                     .filter(inst -> inst instanceof AssignInstruction)
                     .map(AssignInstruction.class::cast)
                     .findFirst()
                     .orElse(null);
 
-            assertTrue("Could not find an assign instruction in method " + methodName, assignInst != null);
+            assertNotNull("Could not find an assign instruction in method " + methodName, assignInst);
 
             // TODO(bartek): Fix
 //            assertEquals(

@@ -44,6 +44,8 @@ public class TypeUtils {
                 yield retType;
             }
             case ID_USE_EXPR -> {
+                String methodName = expr.getAncestor(METHOD_DECL).map(method -> method.get("name")).orElseThrow();
+
                 // TODO(bartek): Should this just be duplicated with OllirExprGeneratorVisitor#visitMethodCallExpr?
                 // final String ident = expr.get("id");
 
