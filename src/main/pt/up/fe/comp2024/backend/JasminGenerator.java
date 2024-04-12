@@ -67,11 +67,12 @@ public class JasminGenerator {
         final StringBuilder code = new StringBuilder();
 
         // generate class name
-        var className = ollirResult.getOllirClass().getClassName();
-        code.append(".class ").append(className).append(NL).append(NL);
+        final ClassUnit ollirClass = ollirResult.getOllirClass();
+        final String className = ollirClass.getClassName();
+        code.append(".class ").append(className).append(NL);
 
-        // TODO: Hardcoded to Object, needs to be expanded
-        code.append(".super java/lang/Object").append(NL);
+        final String superClass = JasminUtils.toJasminSuperclassType(ollirClass.getSuperClass());
+        code.append(".super ").append(superClass).append(NL).append(NL);
 
         // generate a single constructor method
         var defaultConstructor = """
@@ -114,7 +115,12 @@ public class JasminGenerator {
         var methodName = method.getMethodName();
 
         // TODO: Hardcoded param types and return type, needs to be expanded
-        code.append("\n.method ").append(modifier).append(methodName).append("(I)I").append(NL);
+        code.append("\n.method ").append(modifier).append(methodName);
+        code.append("(I)"); // Parameters
+
+        // code.append(JasminUtils.toJasminType(method.getReturnType())); // Return type
+        code.append("I");  // Return type
+        code.append(NL);
 
         // Add limits
         code.append(TAB).append(".limit stack 99").append(NL);
