@@ -48,6 +48,7 @@ public class JasminGenerator {
         generators.put(Operand.class, this::generateOperand);
         generators.put(BinaryOpInstruction.class, this::generateBinaryOp);
         generators.put(ReturnInstruction.class, this::generateReturn);
+        generators.put(CallInstruction.class, this::generateCall);
     }
 
     public List<Report> getReports() {
@@ -71,18 +72,18 @@ public class JasminGenerator {
         final String className = ollirClass.getClassName();
         code.append(".class ").append(className).append(NL);
 
+
         final String superClass = JasminUtils.toJasminSuperclassType(ollirClass.getSuperClass());
         code.append(".super ").append(superClass).append(NL).append(NL);
 
         // generate a single constructor method
-        var defaultConstructor = """
-                ;default constructor
-                .method public <init>()V
-                    aload_0
-                    invokespecial java/lang/Object/<init>()V
-                    return
-                .end method
-                """;
+        String defaultConstructor = ";default constructor" + NL +
+                ".method public <init>()V" + NL +
+                "   aload_0" + NL +
+                "   invokespecial " + superClass + "/" + "<init>()V" + NL +
+                "   return" + NL +
+                ".end method" + NL;
+
         code.append(defaultConstructor);
 
         // generate code for all other methods
@@ -107,22 +108,28 @@ public class JasminGenerator {
 
         final StringBuilder code = new StringBuilder();
 
-        // calculate modifier
-        var modifier = method.getMethodAccessModifier() != AccessModifier.DEFAULT ?
+        // calculate access accessModifier
+        final String accessModifier = method.getMethodAccessModifier() != AccessModifier.DEFAULT ?
                 method.getMethodAccessModifier().name().toLowerCase() + " " :
                 "";
 
-        var methodName = method.getMethodName();
+        final String nonAccessModifier = method.isStaticMethod() ? "static " : "";
+        final String methodName = method.getMethodName();
 
-        // TODO: Hardcoded param types and return type, needs to be expanded
-        code.append("\n.method ").append(modifier).append(methodName);
-        code.append("(I)"); // Parameters
+        code.append("\n.method ").append(accessModifier).append(nonAccessModifier).append(methodName);
 
-        // code.append(JasminUtils.toJasminType(method.getReturnType())); // Return type
-        code.append("I");  // Return type
+        // generate parameters
+        code.append("(");
+        for (final Element param : method.getParams()) {
+            code.append(JasminUtils.toJasminType(param.getType()));
+        }
+        code.append(")");
+
+        code.append(JasminUtils.toJasminType(method.getReturnType())); // Return type
+
         code.append(NL);
 
-        // Add limits
+        // add limits
         code.append(TAB).append(".limit stack 99").append(NL);
         code.append(TAB).append(".limit locals 99").append(NL);
 
@@ -209,5 +216,12 @@ public class JasminGenerator {
 
 
         return code.toString();
+    }
+
+    private String generateCall(CallInstruction callInst) {
+        final StringBuilder code = new StringBuilder();
+
+        return "";
+        // return "methodCall" + NL;
     }
 }
