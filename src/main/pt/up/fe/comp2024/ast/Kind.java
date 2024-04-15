@@ -8,6 +8,7 @@ import java.util.Set;
 
 public enum Kind {
     PROGRAM,
+    IMPORT_DECL,
     CLASS_DECL,
     VAR_DECL,
     TYPE,
@@ -16,9 +17,12 @@ public enum Kind {
     ASSIGN_STMT,
     RETURN_STMT,
     BINARY_EXPR,
+    BINARY_OP,
     INTEGER_LITERAL,
-    VAR_REF_EXPR;
-
+    VAR_REF_EXPR,
+    IDENTIFIER,
+    ID_USE_EXPR, // TODO(bartek): Rename to METHOD_CALL_EXPR
+    EXPRESSION_STMT; // TODO(bartek): Rename to EXPR
 
     private static final Set<Kind> STATEMENTS = Set.of(ASSIGN_STMT, RETURN_STMT);
     private static final Set<Kind> EXPRESSIONS = Set.of(BINARY_EXPR, INTEGER_LITERAL, VAR_REF_EXPR);

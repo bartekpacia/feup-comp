@@ -59,7 +59,7 @@ importDecl
     ;
 
 classDecl
-    : CLASS name=ID (EXTENDS mainc=ID)?
+    : CLASS name=ID (EXTENDS superClass=ID)?
         LCURLY
         varDecl* methodDecl*
         RCURLY
@@ -78,9 +78,9 @@ type locals[boolean isArray=false]
     | name = VOID
     ;
 
-methodDecl locals[boolean isPublic=false]
-    :  ('public'{$isPublic=true;})? 'static'? type name=ID '(' (param (',' param)* )? ')' '{'(varDecl)* (stmt)* retStmt '}' # Method
-    | ('public'{$isPublic=true;})? 'static' type name=ID '(' 'String' '[' ']' parameterName=ID ')' '{'(varDecl)* (stmt)* '}' # MainMethod
+methodDecl locals[boolean isPublic=false, boolean isStatic=false]
+    :  ('public'{$isPublic=true;})? ('static'{$isStatic=true;})? type name=ID '(' (param (',' param)* )? ')' '{'(varDecl)* (stmt)* retStmt '}' # Method
+    | ('public'{$isPublic=true;})? ('static'{$isStatic=true;})? type name=ID '(' 'String' '[' ']' parameterName=ID ')' '{'(varDecl)* (stmt)* '}' # MainMethod
     ;
 
 param
@@ -88,14 +88,12 @@ param
     ;
 
 stmt
-    : LCURLY stmt* RCURLY #CurlyStmt//
-    |  '{' '}'   #BlankExpression
+    : LCURLY stmt* RCURLY #CurlyStmt
     | ifStatment elseStatment #IfElseStmt
     | 'while' '(' expr ')' stmt #WhileStmt
-    | expr ';' stmt #ExpressionStmt
     | expr ';' #ExpressionStmt
-    | id=ID '=' expr ';' #Assignment
-    | id=ID '[' expr ']' '=' expr ';' #Assignment
+    | id=ID '=' expr ';' #AssignStmt
+    | id=ID '[' expr ']' '=' expr ';' #AssignStmt
     ;
 
 ifStatment
@@ -107,21 +105,21 @@ elseStatment
 
 
 expr
-    : LPAREN expr RPAREN #ParenExpr //
-    | expr LSQPAREN expr RSQPAREN #ArrRefExpr //
-    | RSQPAREN (expr (COL expr)*)? LSQPAREN #ArrRefExpr //
+    : LPAREN expr RPAREN #ParenExpr
+    | expr LSQPAREN expr RSQPAREN #ArrRefExpr
+    | RSQPAREN (expr (COL expr)*)? LSQPAREN #ArrRefExpr
     | expr DOT 'length' #LenCheckExpr
-    | expr DOT name=ID LPAREN (expr (COL expr)*)? RPAREN #IdUseExpr //
-    | op=NOT expr #BinaryExpr //
-    | expr (op='*' | op='/' ) expr  #BinaryOp //mudei aqui
-    | expr (op='+' | op='-' ) expr #BinaryOp //mudei aqui
-    | expr (op='<'| op='>' ) expr #BoolOp  //mudei aqui
-    | expr op = '&&' expr #AndOp //mudei aqui
-    | expr op =  '||' expr #OrOp //mudei aqui
+    | expr DOT name=ID LPAREN (expr (COL expr)*)? RPAREN #IdUseExpr
+    | op=NOT expr #BinaryExpr
+    | expr (op='*' | op='/' ) expr  #BinaryExpr
+    | expr (op='+' | op='-' ) expr #BinaryExpr
+    | expr (op='<'| op='>' ) expr #BoolExpr
+    | expr op = '&&' expr #AndOp
+    | expr op =  '||' expr #OrOp
     | expr '[' expr ']' #ArrayIndex
-    | value=INTEGER #IntegerLiteral //
+    | value=INTEGER #IntegerLiteral
     | id = ID #Identifier
-    | name=THIS #VarRefExpr//
+    | name=THIS #VarRefExpr
     | 'new' 'int' '[' expr ']' #NewIntArr
     | 'new' id = ID '(' ')'  #NewClass
     | TRUE #BoolExpr
@@ -135,6 +133,3 @@ expr
 retStmt
     : RETURN expr ';' # ReturnStmt
     ;
-
-
-
