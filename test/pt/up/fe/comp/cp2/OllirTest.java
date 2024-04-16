@@ -289,9 +289,7 @@ public class OllirTest {
                     .filter(instr -> instr instanceof CallInstruction)
                     .map(CallInstruction.class::cast)
                     .filter(instr -> instr.getInvocationType() == CallType.invokestatic)
-                    .peek(instr -> System.out.println("DEBUG 1 :" + instr.toString()))
                     .filter(instr -> ((Operand) instr.getCaller()).getName().equals("nonexist"))
-                    .peek(instr -> System.out.println("DEBUG 2 :" + instr.toString()))
                     .findFirst()
                     .orElse(null);
 

@@ -232,8 +232,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
      * Default visitor. Visits every child node and return an empty string.
      */
     private String defaultVisit(JmmNode node, Void unused) {
-        System.out.println("DEBUG Generator.defaultVisit(" + node.getKind() + ")");
-
         for (var child : node.getChildren()) {
             visit(child);
         }
