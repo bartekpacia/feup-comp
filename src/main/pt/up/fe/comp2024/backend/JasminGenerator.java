@@ -49,6 +49,8 @@ public class JasminGenerator {
         generators.put(BinaryOpInstruction.class, this::generateBinaryOp);
         generators.put(ReturnInstruction.class, this::generateReturn);
         generators.put(CallInstruction.class, this::generateCall);
+        generators.put(PutFieldInstruction.class, this::generatePutField);
+        generators.put(GetFieldInstruction.class, this::generateGetField);
     }
 
     public List<Report> getReports() {
@@ -219,9 +221,27 @@ public class JasminGenerator {
     }
 
     private String generateCall(CallInstruction callInst) {
+        // TODO(bartek): Implement
         final StringBuilder code = new StringBuilder();
 
-        return "";
-        // return "methodCall" + NL;
+        // code.append("methodCall").append(NL);
+
+        return code.toString();
+    }
+
+    private String generatePutField(PutFieldInstruction putFieldInst) {
+        // TODO(bartek): Implement
+        final StringBuilder code = new StringBuilder();
+
+
+        return code.toString();
+    }
+
+    private String generateGetField(GetFieldInstruction putFieldInst) {
+        // TODO(bartek): Implement
+        final StringBuilder code = new StringBuilder();
+
+
+        return code.toString();
     }
 }
