@@ -15,22 +15,53 @@ public class TypeCheck extends AnalysisVisitor {
 
     @Override
     public void buildVisitor() {
-        addVisit(Kind.METHOD_DECL, this::visitMethodDecl);
-        addVisit(Kind.BINARY_EXPR, this::visitOp); //Arithmetic and NOT
-        //addVisit(Kind.BOOL_OP, this::visitOp); // GT/LT Op
-        //addVisit(Kind.AND_OP, this::visitOp);
-        //addVisit(Kind.OR_OP, this::visitOp);
+        addVisit(Kind.METHOD_DECL, this::visitMethodDecl); //get curr method
+        addVisit(Kind.BINARY_EXPR, this::visitArithOp); //Arithmetic and NOT
+        addVisit(Kind.BOOL_OP, this::visitCondOp); // AND/OR
         addVisit(Kind.ASSIGN_STMT, this::visitAssignStmt); // Assignments
-        //addVisit(Kind.ARR_REF_EXPR, this::visitArrRefExpr);
+        addVisit(Kind.ARR_REF_EXPR, this::visitArrRefExpr); //Array ref
         addVisit(Kind.RETURN_STMT, this::visitReturnStmt); //Returns
     }
 
+    private Void visitArithOp(JmmNode node, SymbolTable table) {
+        JmmNode leftNode = node.getChild(0);
+        JmmNode rightNode = node.getChild(1);
+
+        if (leftNode.getKind().equals("IntegerLiteral") && leftNode.getKind().equals("IntegerLiteral")) {
+            return null;
+        }
+
+        var message = String.format("Variable '%s' does not exist.", node.getChild(0));
+        addReport(Report.newError(
+                Stage.SEMANTIC,
+                NodeUtils.getLine(node),
+                NodeUtils.getColumn(node),
+                message,
+                null)
+        );
+        return null;
+    }
     private Void visitMethodDecl(JmmNode method, SymbolTable table) {
         currentMethod = method.get("name");
         return null;
     }
 
-    private Void visitOp(JmmNode node, SymbolTable table) {
+    private Void visitCondOp(JmmNode node, SymbolTable table) {
+        JmmNode leftNode = node.getChild(0);
+        JmmNode rightNode = node.getChild(1);
+
+        if (leftNode.getKind().equals("Bool") && leftNode.getKind().equals("Bool")) {
+            return null;
+        }
+
+        var message = String.format("Variable '%s' does not exist.", node.getChild(0));
+        addReport(Report.newError(
+                Stage.SEMANTIC,
+                NodeUtils.getLine(node),
+                NodeUtils.getColumn(node),
+                message,
+                null)
+        );
         return null;
     }
 

@@ -113,17 +113,17 @@ expr
     | op=NOT expr #BinaryExpr
     | expr (op='*' | op='/' ) expr  #BinaryExpr
     | expr (op='+' | op='-' ) expr #BinaryExpr
-    | expr (op='<'| op='>' ) expr #BoolExpr
-    | expr op = '&&' expr #AndOp
-    | expr op =  '||' expr #OrOp
+    | expr (op='<'| op='>' ) expr #BinaryExpr
+    | expr op = '&&' expr #BoolOp
+    | expr op =  '||' expr #BoolOp
     | expr '[' expr ']' #ArrayIndex
     | value=INTEGER #IntegerLiteral
     | id = ID #Identifier
     | name=THIS #VarRefExpr
     | 'new' 'int' '[' expr ']' #NewIntArr
     | 'new' id = ID '(' ')'  #NewClass
-    | TRUE #BoolExpr
-    | FALSE #BoolExpr
+    | TRUE #Bool
+    | FALSE #Bool
     | THIS #ThisExpr
     | name=ID #IDExpr
     | INT #INTExpr
