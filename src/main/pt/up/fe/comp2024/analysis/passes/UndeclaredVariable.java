@@ -27,10 +27,54 @@ public class UndeclaredVariable extends AnalysisVisitor {
     }
 
     private Void visitOp(JmmNode op, SymbolTable table) {
-        System.out.println(op.getChildren());
-        if (op.getChild(0).getKind().equals("IntegerLiteral")) {
+
+        if (op.getChild(0).getKind().equals("IntegerLiteral") && op.getChild(1).getKind().equals("IntegerLiteral")) {
             return null;
-        } else if (op.getChild(0).getKind().equals("Identifier")) {
+        }
+
+        if (op.getChild(0).getKind().equals("Identifier") && op.getChild(1).getKind().equals("IntegerLiteral")) {
+            SpecsCheck.checkNotNull(currentMethod, () -> "Expected current method to be set");
+
+            // Var is a field, return
+            if (table.getFields().stream()
+                    .anyMatch(param -> param.getName().equals(op.getChild(0).get("id")))){
+                return null;
+            }
+
+            // Var is a parameter, return
+            if (table.getParameters(currentMethod).stream()
+                    .anyMatch(param -> param.getName().equals(op.getChild(0).get("id")))) {
+                return null;
+            }
+
+            // Var is a declared variable, return
+            if ((table.getLocalVariables(currentMethod).stream()
+                    .anyMatch(varDecl -> varDecl.getName().equals(op.getChild(0).get("id")))))  {
+                return null;
+            }
+        }
+
+        if (op.getChild(0).getKind().equals("IntegerLiteral") && op.getChild(1).getKind().equals("Identifier")) {
+            // Var is a field, return
+            if (table.getFields().stream()
+                    .anyMatch(param -> param.getName().equals(op.getChild(1).get("id")))){
+                return null;
+            }
+
+            // Var is a parameter, return
+            if (table.getParameters(currentMethod).stream()
+                    .anyMatch(param -> param.getName().equals(op.getChild(1).get("id")))) {
+                return null;
+            }
+
+            // Var is a declared variable, return
+            if ((table.getLocalVariables(currentMethod).stream()
+                    .anyMatch(varDecl -> varDecl.getName().equals(op.getChild(1).get("id")))))  {
+                return null;
+            }
+        }
+
+        if (op.getChild(0).getKind().equals("Identifier") && op.getChild(1).getKind().equals("Identifier")) {
             SpecsCheck.checkNotNull(currentMethod, () -> "Expected current method to be set");
 
             // Var is a field, return
@@ -57,6 +101,16 @@ public class UndeclaredVariable extends AnalysisVisitor {
                 return null;
             }
         }
+
+        var message = String.format("Variable '%s' does not exist.", op.getChild(0));
+        addReport(Report.newError(
+                Stage.SEMANTIC,
+                NodeUtils.getLine(op),
+                NodeUtils.getColumn(op),
+                message,
+                null)
+        );
+
         return null;
     }
     private Void visitReturnStmt(JmmNode stmt, SymbolTable table) {
@@ -101,43 +155,4 @@ public class UndeclaredVariable extends AnalysisVisitor {
         currentMethod = method.get("name");
         return null;
     }
-
-    private Void visitVarRefExpr(JmmNode varRefExpr, SymbolTable table) {
-        SpecsCheck.checkNotNull(currentMethod, () -> "Expected current method to be set");
-
-        // Check if exists a parameter or variable declaration with the same name as the variable reference
-        var varRefName = varRefExpr.get("name");
-
-        // Var is a field, return
-        if (table.getFields().stream()
-                .anyMatch(param -> param.getName().equals(varRefName))) {
-            return null;
-        }
-
-        // Var is a parameter, return
-        if (table.getParameters(currentMethod).stream()
-                .anyMatch(param -> param.getName().equals(varRefName))) {
-            return null;
-        }
-
-        // Var is a declared variable, return
-        if (table.getLocalVariables(currentMethod).stream()
-                .anyMatch(varDecl -> varDecl.getName().equals(varRefName))) {
-            return null;
-        }
-
-        // Create error report
-        var message = String.format("Variable '%s' does not exist.", varRefName);
-        addReport(Report.newError(
-                Stage.SEMANTIC,
-                NodeUtils.getLine(varRefExpr),
-                NodeUtils.getColumn(varRefExpr),
-                message,
-                null)
-        );
-
-        return null;
-    }
-
-
 }
