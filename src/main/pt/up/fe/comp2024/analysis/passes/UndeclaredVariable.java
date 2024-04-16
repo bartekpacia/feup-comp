@@ -21,7 +21,6 @@ public class UndeclaredVariable extends AnalysisVisitor {
     @Override
     public void buildVisitor() {
         addVisit(Kind.METHOD_DECL, this::visitMethodDecl);
-        //addVisit(Kind.VAR_REF_EXPR, this::visitVarRefExpr);
         addVisit(Kind.BINARY_EXPR, this::visitOp);
         addVisit(Kind.RETURN_STMT, this::visitReturnStmt);
     }
@@ -153,6 +152,7 @@ public class UndeclaredVariable extends AnalysisVisitor {
 
     private Void visitMethodDecl(JmmNode method, SymbolTable table) {
         currentMethod = method.get("name");
+
         return null;
     }
 }

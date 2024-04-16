@@ -93,7 +93,7 @@ stmt
     | 'while' '(' expr ')' stmt #WhileStmt
     | expr ';' #ExpressionStmt
     | id=ID '=' expr ';' #AssignStmt
-    | id=ID '[' expr ']' '=' expr ';' #AssignStmt
+    | id=ID '[' expr ']' '=' expr ';' #ArrayAssignStmt
     ;
 
 ifStatment
@@ -110,7 +110,7 @@ expr
     | RSQPAREN (expr (COL expr)*)? LSQPAREN #ArrRefExpr
     | expr DOT 'length' #LenCheckExpr
     | expr DOT name=ID LPAREN (expr (COL expr)*)? RPAREN #IdUseExpr
-    | op=NOT expr #BinaryExpr
+    | op=NOT expr #NOTOp
     | expr (op='*' | op='/' ) expr  #BinaryExpr
     | expr (op='+' | op='-' ) expr #BinaryExpr
     | expr (op='<'| op='>' ) expr #BinaryExpr
@@ -122,8 +122,8 @@ expr
     | name=THIS #VarRefExpr
     | 'new' 'int' '[' expr ']' #NewIntArr
     | 'new' id = ID '(' ')'  #NewClass
-    | TRUE #Bool
-    | FALSE #Bool
+    | value=TRUE #Bool
+    | value=FALSE #Bool
     | THIS #ThisExpr
     | name=ID #IDExpr
     | INT #INTExpr

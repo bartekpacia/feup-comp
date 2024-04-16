@@ -8,12 +8,14 @@ import pt.up.fe.comp.jmm.ast.JmmNode;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.sun.source.tree.Tree.Kind.NEW_CLASS;
 import static pt.up.fe.comp2024.ast.Kind.ASSIGN_STMT;
 import static pt.up.fe.comp2024.ast.Kind.METHOD_DECL;
 
 public class TypeUtils {
 
     private static final String INT_TYPE_NAME = "int";
+    private static final String BOOL_TYPE_NAME = "boolean";
     private static final String VOID_TYPE_NAME = "void";
 
     public static String getIntTypeName() {
@@ -31,7 +33,11 @@ public class TypeUtils {
         return switch (kind) {
             case BINARY_EXPR -> getBinExprType(expr);
             case VAR_REF_EXPR -> getVarExprType(expr, table);
+            case BOOL -> new Type(BOOL_TYPE_NAME,false);
             case INTEGER_LITERAL -> new Type(INT_TYPE_NAME, false);
+            case NEW_CLASS -> new Type(expr.get("id"),false);
+            case NEW_INT_ARR -> new Type(INT_TYPE_NAME, true);
+            case ARR_REF_EXPR -> new Type(INT_TYPE_NAME, true);
             case ID_USE_EXPR -> {
                 final String name = expr.get("name");
 
@@ -129,17 +135,77 @@ public class TypeUtils {
     }
 
     private static Type getVarExprType(JmmNode varRefExpr, SymbolTable table) {
-        // TODO: Simple implementation that needs to be expanded
-        return new Type(INT_TYPE_NAME, false);
+        String varName = varRefExpr.get("name");
+
+        String currentMethod = varRefExpr.getAncestor(METHOD_DECL).orElseThrow().get("name");
+
+        var fields = table.getFields();
+        var params = table.getParameters(currentMethod);
+        var locals = table.getLocalVariables(currentMethod);
+
+        // Check if the variable is a field
+        for (var field : fields) {
+            if (field.getName().equals(varName)) {
+                return field.getType();
+            }
+        }
+
+        // Check if the variable is a parameter
+        for (var param : params) {
+            if (param.getName().equals(varName)) {
+                return param.getType();
+            }
+        }
+
+        // Check if the variable is a local variable
+        for (var local : locals) {
+            if (local.getName().equals(varName)) {
+                return local.getType();
+            }
+        }
+
+        throw new RuntimeException("Variable " + varName + "not found.");
     }
 
+    public static Type getVarExprAssignType(JmmNode node, SymbolTable table) {
+        String leftSymbol = node.get("id");
+
+        String currentMethod = node.getAncestor(METHOD_DECL).orElseThrow().get("name");
+
+        var fields = table.getFields();
+        var params = table.getParameters(currentMethod);
+        var locals = table.getLocalVariables(currentMethod);
+
+        // Check if the variable is a field
+        for (var field : fields) {
+            if (field.getName().equals(leftSymbol)) {
+                return field.getType();
+            }
+        }
+
+        // Check if the variable is a parameter
+        for (var param : params) {
+            if (param.getName().equals(leftSymbol)) {
+                return param.getType();
+            }
+        }
+
+        // Check if the variable is a local variable
+        for (var local : locals) {
+            if (local.getName().equals(leftSymbol)) {
+                return local.getType();
+            }
+        }
+
+        throw new RuntimeException("Variable " + leftSymbol + "not found.");
+    }
     /**
      * @param sourceType
      * @param destinationType
      * @return true if sourceType can be assigned to destinationType
      */
     public static boolean areTypesAssignable(Type sourceType, Type destinationType) {
-        // TODO: Simple implementation that needs to be expanded
-        return sourceType.getName().equals(destinationType.getName());
+
+        return sourceType.equals(destinationType);
     }
 }
