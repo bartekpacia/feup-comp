@@ -21,7 +21,80 @@ public class UndeclaredVariable extends AnalysisVisitor {
     @Override
     public void buildVisitor() {
         addVisit(Kind.METHOD_DECL, this::visitMethodDecl);
-        addVisit(Kind.VAR_REF_EXPR, this::visitVarRefExpr);
+        //addVisit(Kind.VAR_REF_EXPR, this::visitVarRefExpr);
+        addVisit(Kind.BINARY_EXPR, this::visitOp);
+        addVisit(Kind.RETURN_STMT, this::visitReturnStmt);
+    }
+
+    private Void visitOp(JmmNode op, SymbolTable table) {
+        System.out.println(op.getChildren());
+        if (op.getChild(0).getKind().equals("IntegerLiteral")) {
+            return null;
+        } else if (op.getChild(0).getKind().equals("Identifier")) {
+            SpecsCheck.checkNotNull(currentMethod, () -> "Expected current method to be set");
+
+            // Var is a field, return
+            if ((table.getFields().stream()
+                    .anyMatch(param -> param.getName().equals(op.getChild(0).get("id")))) &&
+                    (table.getFields().stream()
+                    .anyMatch(param -> param.getName().equals(op.getChild(1).get("id"))))){
+                return null;
+            }
+
+            // Var is a parameter, return
+            if ((table.getParameters(currentMethod).stream()
+                    .anyMatch(param -> param.getName().equals(op.getChild(0).get("id")))) &&
+                    (table.getParameters(currentMethod).stream()
+                    .anyMatch(param -> param.getName().equals(op.getChild(1).get("id"))))) {
+                return null;
+            }
+
+            // Var is a declared variable, return
+            if ((table.getLocalVariables(currentMethod).stream()
+                    .anyMatch(varDecl -> varDecl.getName().equals(op.getChild(0).get("id")))) &&
+                    (table.getLocalVariables(currentMethod).stream()
+                    .anyMatch(varDecl -> varDecl.getName().equals(op.getChild(1).get("id"))))) {
+                return null;
+            }
+        }
+        return null;
+    }
+    private Void visitReturnStmt(JmmNode stmt, SymbolTable table) {
+        JmmNode returnVar = stmt.getChild(0);
+        if (returnVar.getKind().equals("IntegerLiteral")) {
+            return null;
+        } else if (returnVar.getKind().equals("Identifier")) {
+                SpecsCheck.checkNotNull(currentMethod, () -> "Expected current method to be set");
+
+                // Var is a field, return
+                if (table.getFields().stream()
+                        .anyMatch(param -> param.getName().equals(returnVar.get("id")))) {
+                    return null;
+                }
+
+                // Var is a parameter, return
+                if (table.getParameters(currentMethod).stream()
+                        .anyMatch(param -> param.getName().equals(returnVar.get("id")))) {
+                    return null;
+                }
+
+                // Var is a declared variable, return
+                if (table.getLocalVariables(currentMethod).stream()
+                        .anyMatch(varDecl -> varDecl.getName().equals(returnVar.get("id")))) {
+                    return null;
+                }
+        }
+
+        var message = String.format("Variable '%s' does not exist.", stmt.getChild(0));
+        addReport(Report.newError(
+                Stage.SEMANTIC,
+                NodeUtils.getLine(stmt),
+                NodeUtils.getColumn(stmt),
+                message,
+                null)
+        );
+
+        return null;
     }
 
     private Void visitMethodDecl(JmmNode method, SymbolTable table) {
