@@ -11,7 +11,7 @@
     return
 .end method
 
-.method public static foo(java/lang/Object;)V
+.method public static foo(Ljava/lang/Object;)V
     .limit stack 2
 
     return
