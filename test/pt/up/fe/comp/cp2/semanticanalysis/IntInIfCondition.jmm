@@ -6,7 +6,8 @@ class IntInIfCondition {
 
     public int foo() {
         if (1 + 2) {
-        } else {
+        }
+        else {
         }
 
         return 0;

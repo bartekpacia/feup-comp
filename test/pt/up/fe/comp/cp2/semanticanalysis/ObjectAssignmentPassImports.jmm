@@ -1,6 +1,7 @@
 import A;
 import B;
 
+
 class ObjectAssignmentPassImports {
 
     public static void main(String[] args) {
