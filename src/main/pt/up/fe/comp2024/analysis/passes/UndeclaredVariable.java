@@ -28,18 +28,17 @@ public class UndeclaredVariable extends AnalysisVisitor {
     }
 
     private Void visitIDUseExpr(JmmNode node, SymbolTable table) {
+
         for (var method : table.getMethods()) {
             if (method.equals(node.get("name"))) {
                 return null;
             }
         }
+
         final var type = TypeUtils.getExprType(node.getChild(0), table);
-        System.out.println(type);
+        final var importedName = node.getChild(0).get("id");
         for (var tableImport : table.getImports()) {
-            System.out.println(tableImport);
-            System.out.println(node.get("name"));
-            System.out.println("this is it");
-            if (tableImport.equals(table.getSuper()) || tableImport.equals(type.getName())) {
+            if (tableImport.equals(table.getSuper()) || tableImport.equals(importedName)) {
                 return null;
             }
         }
@@ -58,7 +57,7 @@ public class UndeclaredVariable extends AnalysisVisitor {
 
     private Void visitOp(JmmNode op, SymbolTable table) {
 
-        if (op.getChild(0).getKind().equals("IntegerLiteral") && op.getChild(1).getKind().equals("IntegerLiteral")) {
+        if (TypeUtils.getExprType(op.getChild(0),table).getName().equals("int") && TypeUtils.getExprType(op.getChild(1),table).getName().equals("int")) {
             return null;
         }
 
