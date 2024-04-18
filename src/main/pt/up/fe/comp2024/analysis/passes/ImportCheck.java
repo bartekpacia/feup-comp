@@ -19,7 +19,7 @@ public class ImportCheck extends AnalysisVisitor {
 
     @Override
     public void buildVisitor() {
-        addVisit(Kind.CLASS_DECL,this::dealWithClass);
+        //addVisit(Kind.CLASS_DECL,this::dealWithClass);
         addVisit(Kind.METHOD_DECL, this::dealWithMethod);
         addVisit("AssignStmt", this::dealWithImportedAssignment);
 
@@ -31,6 +31,7 @@ public class ImportCheck extends AnalysisVisitor {
         return null;
     }
 
+    /*
     private Void dealWithClass(JmmNode node, SymbolTable table) {
 
         superclass = node.get("superClass");
@@ -38,44 +39,9 @@ public class ImportCheck extends AnalysisVisitor {
         return null;
     }
 
+     */
+
     private Void dealWithImportedAssignment(JmmNode node, SymbolTable table) {
-
-        if(node.getChild(0).getKind().equals("IdUseExpr")){
-            if(!table.getImports().contains(node.getChild(0).getChild(0).get("id"))){
-                var message = String.format("Class has %s not been imported",node.getChild(0).getChild(0).get("id"));
-                addReport(Report.newError(Stage.SEMANTIC, 5, 5, message, null));
-
-                return null;
-            }
-
-        }
-
-        System.out.println("SUPERCLASS:");
-        System.out.println(superclass);
-
-        System.out.println(node);
-        //System.out.println(TypeUtils.getExprType(node,table));
-
-        System.out.println(node.getChild(0));
-        System.out.println(TypeUtils.getExprType(node.getChild(0),table));
-
-        System.out.println(" ");
-
-        /*
-        if(node.getChild(0).getKind().equals("Identifier")){  // se houver uma igualdade entre duas variaveis
-            System.out.println("INGUALDADE DE DOIS INDENTIFIERS");
-            if(TypeUtils.getExprType(node.getChild(0),table).getName().equals(TypeUtils.getExprType(node,table).getName())){
-
-            }
-        }
-
-         */
-
-        System.out.println(TypeUtils.getExprType(node,table));
-
-
-
-
 
         return null;
     }
