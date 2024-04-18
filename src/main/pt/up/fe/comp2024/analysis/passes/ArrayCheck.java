@@ -54,6 +54,7 @@ public class ArrayCheck extends AnalysisVisitor {
         for (var child : node.getChildren()) {
             var childType = TypeUtils.getExprType(child, table).getName();
             if (!childType.equals(type)) {
+
                 var message = String.format("Variable '%s' does not exist.", node.getChild(0));
                 addReport(Report.newError(
                         Stage.SEMANTIC,

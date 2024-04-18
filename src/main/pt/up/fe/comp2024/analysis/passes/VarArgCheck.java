@@ -23,6 +23,7 @@ public class VarArgCheck extends AnalysisVisitor {
                 return null;
             }
         }
+
         var message = String.format("Variable '%s' does not exist.", node.get("id"));
         addReport(Report.newError(
                 Stage.SEMANTIC,

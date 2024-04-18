@@ -94,13 +94,14 @@ public class TypeCheck extends AnalysisVisitor {
         var rightType = TypeUtils.getExprType(rightNode,table);
         var leftType = TypeUtils.getVarExprAssignType(node, table);
 
+
+
         if (rightType.equals(leftType)) {
             return null;
         }
 
-        System.out.println("HEREEEEEEEEE");
-        System.out.println(node);
 
+        System.out.println("ESTOU AQUIIIIIIIIIIIIIIIII");
         var message = String.format("Variable '%s' does not exist.", node.getChild(0));
         addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(node), NodeUtils.getColumn(node), message, null)
         );
@@ -121,6 +122,7 @@ public class TypeCheck extends AnalysisVisitor {
             return null;
         }
 
+        System.out.println("ESTOU AQUIIIIIIIIIIIIIIIII");
         var message = String.format("Variable '%s' does not exist.", stmt.getChild(0));
         addReport(Report.newError(
                 Stage.SEMANTIC,
