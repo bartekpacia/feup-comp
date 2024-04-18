@@ -299,7 +299,7 @@ public class JasminGenerator {
         final StringBuilder code = new StringBuilder();
 
         // Push last operand onto the stack. Last operand is the value.
-        final var value = (LiteralElement) putFieldInst.getOperands().getLast();
+        final var value = (LiteralElement) putFieldInst.getOperands().get(putFieldInst.getOperands().size() - 1);
         code.append("bipush ").append(value.getLiteral());
 
         // Example:
