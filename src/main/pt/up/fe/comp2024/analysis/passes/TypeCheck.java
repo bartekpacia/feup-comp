@@ -1,6 +1,5 @@
 package pt.up.fe.comp2024.analysis.passes;
 
-import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.report.Report;
@@ -18,14 +17,13 @@ public class TypeCheck extends AnalysisVisitor {
 
     @Override
     public void buildVisitor() {
-        addVisit(Kind.METHOD_DECL, this::visitMethodDecl); //get curr method
-        addVisit(Kind.BINARY_EXPR, this::visitArithOp); //Arithmetic and NOT
-        addVisit(Kind.BOOL_OP, this::visitCondOp); // AND/OR
-        addVisit(Kind.NOT_OP, this::visitCondOp); // AND/OR
-        addVisit(Kind.ASSIGN_STMT, this::visitAssignStmt); // Assignments
-        //addVisit(Kind.ARR_REF_EXPR, this::visitArrRefExpr); //Array ref
-        addVisit(Kind.RETURN_STMT, this::visitReturnStmt); //Returns
-        addVisit(Kind.VAR_REF_EXPR, this::visitVarRefExpr); //Variable reference
+        addVisit(Kind.METHOD_DECL, this::visitMethodDecl);
+        addVisit(Kind.BINARY_EXPR, this::visitArithmeticOp);
+        addVisit(Kind.BOOL_OP, this::visitCondOp);
+        addVisit(Kind.NOT_OP, this::visitCondOp);
+        addVisit(Kind.ASSIGN_STMT, this::visitAssignStmt);
+        addVisit(Kind.RETURN_STMT, this::visitReturnStmt);
+        addVisit(Kind.VAR_REF_EXPR, this::visitVarRefExpr);
     }
 
     private Void visitVarRefExpr(JmmNode node, SymbolTable table) {
@@ -44,7 +42,7 @@ public class TypeCheck extends AnalysisVisitor {
 
         return null;
     }
-    private Void visitArithOp(JmmNode node, SymbolTable table) {
+    private Void visitArithmeticOp(JmmNode node, SymbolTable table) {
         var leftType = TypeUtils.getExprType(node.getChild(0),table);
         var rightType = TypeUtils.getExprType(node.getChild(1),table);
 
@@ -111,18 +109,18 @@ public class TypeCheck extends AnalysisVisitor {
         return null;
     }
 
-/*    private Void visitArrRefExpr(JmmNode node, SymbolTable table) {
-
-        return null;
-    }*/
-
     private Void visitReturnStmt(JmmNode stmt, SymbolTable table) {
         JmmNode returnVar = stmt.getChild(0);
-        if ((returnVar.getKind().equals("IntegerLiteral") && table.getReturnType(currentMethod).getName().equals("int")) || (returnVar.getKind().equals("IntegerLiteral") && table.getReturnType(currentMethod).getName().equals("bool"))) {
+        final boolean isIntegerLiteral = returnVar.getKind().equals("IntegerLiteral");
+        final boolean isIdentifier = returnVar.getKind().equals("Identifier");
+        final boolean isArrayIndex = returnVar.getKind().equals("ArrayIndex");
+        final boolean isReturnTypeInt = table.getReturnType(currentMethod).getName().equals("int");
+        final boolean isReturnTypeBool = table.getReturnType(currentMethod).getName().equals("bool");
+        if ((isIntegerLiteral && isReturnTypeInt) || (isIntegerLiteral && isReturnTypeBool)) {
             return null;
-        } else if (returnVar.getKind().equals("Identifier") && varIsReturnType(returnVar, table)) {
+        } else if (isIdentifier && varIsReturnType(returnVar, table)) {
             return null;
-        } else if (returnVar.getKind().equals("ArrayIndex")) {
+        } else if (isArrayIndex) {
             return null; }
 
         var message = String.format("Variable '%s' does not exist - type_retpvisit", stmt.getChild(0));
@@ -133,13 +131,12 @@ public class TypeCheck extends AnalysisVisitor {
                 message,
                 null)
         );
-
         return null;
     }
 
     private boolean varIsReturnType(JmmNode var, SymbolTable table) {
         SpecsCheck.checkNotNull(currentMethod, () -> "Expected current method to be set");
-        //TODO Not sure if 100% correct but avoids a private test
+        //TODO(goncalo) Not sure if 100% correct but avoids a private test
         if(currentMethodNode.get("isStatic").equals("false")) {
             for (var field : table.getFields()) {
                 if (field.getName().equals(var.get("id"))) {

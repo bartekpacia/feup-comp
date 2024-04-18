@@ -111,7 +111,7 @@ expr
     | RSQPAREN (expr (COL expr)*)? LSQPAREN #ArrRefExpr
     | expr DOT 'length' #LenCheckExpr
     | expr DOT name=ID LPAREN (expr (COL expr)*)? RPAREN #IdUseExpr
-    | op=NOT expr #NOTOp
+    | op=NOT expr #NotOp
     | expr (op='*' | op='/' ) expr  #BinaryExpr
     | expr (op='+' | op='-' ) expr #BinaryExpr
     | expr (op='<'| op='>' ) expr #BinaryExpr
