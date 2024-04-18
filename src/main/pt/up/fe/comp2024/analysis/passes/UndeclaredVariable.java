@@ -41,6 +41,12 @@ public class UndeclaredVariable extends AnalysisVisitor {
             if (tableImport.equals(table.getSuper()) || tableImport.equals(importedName)) {
                 return null;
             }
+
+            // Check if method comes from an imported class
+            final JmmNode childNode = node.getChild(0);
+            if (childNode.getOptional("id").isPresent() && childNode.getOptional("id").get().equals(tableImport)) {
+                return null;
+            }
         }
 
         var message = String.format("Variable '%s' does not exist - undv_iduseexprvisit", node);
