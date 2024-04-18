@@ -1,14 +1,14 @@
 package pt.up.fe.comp2024.optimization;
 
+import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.ast.PreorderJmmVisitor;
 import pt.up.fe.comp2024.ast.TypeUtils;
 
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.ArrayList;
+import java.util.List;
 
 import static pt.up.fe.comp2024.ast.Kind.*;
 import static pt.up.fe.comp2024.optimization.OllirTokens.*;
@@ -70,16 +70,26 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
     }
 
     private OllirExprResult visitVarRef(JmmNode node, Void unused) {
-//        .
-
-        // String code = id + ollirType;
-        String code = "this";
-
+        final String code = "this";
         return new OllirExprResult(code);
     }
 
     private OllirExprResult visitIdentifier(JmmNode node, Void unused) {
-        final String id = node.get("id");
+        String id = node.get("id");
+        final String methodName = node.getAncestor(METHOD_DECL).map(method -> method.get("name")).orElseThrow();
+
+        // Hacky hack. Search for identifier in method's parameters
+        final List<Symbol> params = new ArrayList<>(table.getParameters(methodName));
+        for (int i = 0; i < params.size(); i++) {
+            final Symbol param = params.get(i);
+
+            // FIXME(bartek): Ugly hack to reference actuals. Working around the need of prefixing with $ and actual's index.
+            if (param.getName().equals(id)) {
+                id = "$" + i + "." + id;
+                break;
+            }
+        }
+
         final Type type = TypeUtils.getExprType(node, table);
         final String ollirType = OptUtils.toOllirType(type);
         final String code = id + ollirType;
@@ -113,7 +123,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
                     yield "invokevirtual(" + id + "." + idType.getName();
                 }
             }
-            case "VarRefExpr" -> "invokevirtual(this, ";
+            case "VarRefExpr" -> "invokevirtual(this";
             default -> throw new IllegalStateException("Invalid first child node of a method");
         };
 
@@ -121,9 +131,14 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
 
         final StringBuilder methodInvocationCode = new StringBuilder();
         {
-            final Stream<String> leading = Stream.of(invocationCode, "\"" + methodName + "\"");
-            final Stream<String> args = node.getChildrenStream().skip(1).map(child -> visit(child).getCode()); // Visit more JmmNode children to get the actuals
-            methodInvocationCode.append(Stream.concat(leading, args).collect(Collectors.joining(", ")));
+            final List<String> actuals = node.getChildrenStream().skip(1).map(child -> visit(child).getCode()).toList();
+
+            final List<String> codes = new ArrayList<>();
+            codes.add(invocationCode);
+            codes.add('"' + methodName + '"');
+            codes.addAll(actuals);
+
+            methodInvocationCode.append(String.join(", ", codes));
             methodInvocationCode.append(R_PAREN);
         }
 

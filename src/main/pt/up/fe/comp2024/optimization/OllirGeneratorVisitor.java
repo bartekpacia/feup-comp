@@ -55,8 +55,8 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         StringBuilder code = new StringBuilder();
 
-        // code.append(lhs.getComputation());
-        // code.append(rhs.getComputation());
+         // code.append(lhs.getComputation());
+         code.append(rhs.getComputation());
 
         // code to compute self
         // statement has type of lhs

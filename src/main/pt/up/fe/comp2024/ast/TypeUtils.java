@@ -4,6 +4,7 @@ import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
+import pt.up.fe.comp2024.optimization.OptUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -93,8 +94,12 @@ public class TypeUtils {
 
                 // Search for identifier in method's parameters
                 final List<Symbol> params = new ArrayList<>(table.getParameters(methodName));
-                for (final Symbol param : params) {
+                for (int i = 0; i < params.size(); i++) {
+                    final Symbol param = params.get(i);
+
                     if (param.getName().equals(ident)) {
+                        // FIXME(bartek): Ugly hack to reference actuals. Working around the need of prefixing with $ and actual's index.
+                        //  Code from OllirExprGeneratorVisitor#visitIdentifier() should actually be here.
                         localType = param.getType();
                         break;
                     }
