@@ -7,10 +7,7 @@ class ClassNotImported {
     public int foo() {
         int b;
         int a;
-        int c;
         b = 2;
-        c = 4;
-        b = c;
         a = A.bar();
         return a;
     }

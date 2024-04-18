@@ -28,14 +28,23 @@ public class UndeclaredVariable extends AnalysisVisitor {
     }
 
     private Void visitIDUseExpr(JmmNode node, SymbolTable table) {
-
         for (var method : table.getMethods()) {
             if (method.equals(node.get("name"))) {
                 return null;
             }
         }
+        final var type = TypeUtils.getExprType(node.getChild(0), table);
+        System.out.println(type);
+        for (var tableImport : table.getImports()) {
+            System.out.println(tableImport);
+            System.out.println(node.get("name"));
+            System.out.println("this is it");
+            if (tableImport.equals(table.getSuper()) || tableImport.equals(type.getName())) {
+                return null;
+            }
+        }
 
-        var message = String.format("Variable '%s' does not exist - undv_thisvisit", node.getChild(0));
+        var message = String.format("Variable '%s' does not exist - undv_iduseexprvisit", node);
         addReport(Report.newError(
                 Stage.SEMANTIC,
                 NodeUtils.getLine(node),

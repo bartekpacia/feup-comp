@@ -19,9 +19,8 @@ public class ImportCheck extends AnalysisVisitor {
 
     @Override
     public void buildVisitor() {
-        addVisit("Identifier",this::dealWithImportedAssignment);
+        addVisit(Kind.IDENTIFIER, this::dealWithImportedAssignment);
         addVisit(Kind.METHOD_DECL, this::dealWithMethod);
-
     }
 
     private Void dealWithMethod(JmmNode node, SymbolTable table) {
@@ -55,14 +54,18 @@ public class ImportCheck extends AnalysisVisitor {
             }
         }
 
-        if(!table.getImports().contains(node.get("id"))){
-            var message = String.format("Class %s has not been imported", node.get("id"));
-            addReport(Report.newError(Stage.SEMANTIC, 5, 5, message, null));
+        final var superName = table.getSuper();
+        final var tableImports = table.getImports();
+        if(tableImports.contains(node.get("id")) || node.get("id").equals(superName)) {
+            return null;
         }
 
-        // System.out.println("---------------------------------------");
-
-
+        var message = String.format("Class %s has not been imported or extended", node.get("id"));
+        addReport(Report.newError(Stage.SEMANTIC,
+                5,
+                5,
+                message,
+                null));
         return null;
     }
 
