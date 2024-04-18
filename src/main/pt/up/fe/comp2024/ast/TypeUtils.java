@@ -15,6 +15,7 @@ import static pt.up.fe.comp2024.ast.Kind.METHOD_DECL;
 public class TypeUtils {
 
     private static final String INT_TYPE_NAME = "int";
+    private static final String VARARG_TYPE_NAME = "int...";
     private static final String BOOL_TYPE_NAME = "boolean";
     private static final String VOID_TYPE_NAME = "void";
 
@@ -35,6 +36,7 @@ public class TypeUtils {
             case VAR_REF_EXPR -> getVarExprType(expr, table);
             case BOOL -> new Type(BOOL_TYPE_NAME,false);
             case INTEGER_LITERAL -> new Type(INT_TYPE_NAME, false);
+            case VARARG -> new Type(VARARG_TYPE_NAME, false);
             case NEW_CLASS -> new Type(expr.get("id"),false);
             case NEW_INT_ARR -> new Type(INT_TYPE_NAME, true);
             case ARR_REF_EXPR -> new Type(INT_TYPE_NAME, true);

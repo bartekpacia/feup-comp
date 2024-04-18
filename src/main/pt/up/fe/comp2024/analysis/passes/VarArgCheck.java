@@ -7,6 +7,7 @@ import pt.up.fe.comp.jmm.report.Stage;
 import pt.up.fe.comp2024.analysis.AnalysisVisitor;
 import pt.up.fe.comp2024.ast.Kind;
 import pt.up.fe.comp2024.ast.NodeUtils;
+import pt.up.fe.comp2024.ast.TypeUtils;
 
 public class VarArgCheck extends AnalysisVisitor {
     
@@ -18,7 +19,7 @@ public class VarArgCheck extends AnalysisVisitor {
     private Void visitMethodDecl(JmmNode node, SymbolTable table) {
         int lastIdx = table.getParameters(node.get("node")).size()-1;
         for (int i = 0; i < table.getParameters(node.get("node")).size(); i++) {
-            if(node.get("isVarArg").equals("true") && (i == lastIdx)) {
+            if(TypeUtils.getExprType(node,table).getName().equals("int...") && (i == lastIdx)) {
                 return null;
             }
         }
