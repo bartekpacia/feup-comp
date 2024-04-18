@@ -148,6 +148,13 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
                 .collect(Collectors.joining());
         code.append(methodBodyCode);
 
+        // Make sure to add ReturnStmt, even if it's not present in the AST.
+        boolean hasReturnStmt = node.getChildrenStream()
+            .anyMatch((childNode) -> childNode.getKind().equals("ReturnStmt"));
+        if (!hasReturnStmt) {
+            code.append("ret.V").append(END_STMT);
+        }
+
         code.append(R_CURLY);
         code.append(NL);
 

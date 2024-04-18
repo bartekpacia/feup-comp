@@ -10,7 +10,6 @@ import pt.up.fe.specs.util.utilities.StringLines;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -276,7 +275,10 @@ public class JasminGenerator {
 
             }
             case invokestatic -> {
-                code.append("invokestatic ").append(NL);
+                final String classname = ((Operand) callInst.getCaller()).getName();
+                final String methodname = ((LiteralElement) callInst.getMethodName()).getLiteral().replace("\"", "");
+                final String descriptor = "()V";
+                code.append("invokestatic ").append(classname).append("/").append(methodname).append(descriptor).append(NL);
             }
             case NEW -> {
                 final String classname = ((Operand) callInst.getCaller()).getName();
