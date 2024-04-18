@@ -23,15 +23,14 @@ public class ArrayCheck extends AnalysisVisitor {
 
     private Void visitArrIdx(JmmNode node, SymbolTable table) {
         var leftType = TypeUtils.getExprType(node.getChild(0),table);
-        var rightType = TypeUtils.getExprType(node.getChild(1),table);
-        System.out.println(rightType.getName());
-        System.out.println(leftType.isArray());
         System.out.println(leftType.getName());
-        if(rightType.getName().equals("int")) {
-            if(leftType.isArray() || leftType.getName().equals("int...")) {
-                return null;
-            }
+        var rightType = TypeUtils.getExprType(node.getChild(1),table);
+        if((!rightType.getName().equals("int")) || !leftType.isArray()){
+            return null;
         }
+        /*if (TypeUtils.getExprType(node.getChild(0),table).equals(TypeUtils.getExprType(node.getChild(1),table))) {
+            return null;
+        }*/
 
         var message = String.format("Variable '%s' does not exist.", node);
         addReport(Report.newError(
