@@ -2,7 +2,6 @@ package pt.up.fe.comp2024.optimization;
 
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
-import pt.up.fe.specs.util.exceptions.NotImplementedException;
 
 import static pt.up.fe.comp2024.ast.Kind.TYPE;
 

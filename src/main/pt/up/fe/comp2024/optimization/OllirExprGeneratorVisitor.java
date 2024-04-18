@@ -2,7 +2,6 @@ package pt.up.fe.comp2024.optimization;
 
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
-import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.ast.PreorderJmmVisitor;
 import pt.up.fe.comp2024.ast.TypeUtils;
@@ -98,22 +97,23 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         //   * the receiver, a.k.a the object that the method is called on: obj.foo(bar)
         //  * VarRefExpr ("this"), in case it is a virtual method
         final JmmNode firstChild = node.getChild(0);
-        final String receiver = switch (firstChild.getKind()) {
+        final String invocationCode = switch (firstChild.getKind()) {
             case "Identifier" -> {
                 final String id = firstChild.get("id");
-                // bartek: Is this needed?
                 final boolean receiverIsImport = table.getImports().stream().anyMatch(importName -> importName.equals(id));
 
                 if (receiverIsImport) {
                     // Receiver is an imported class.
                     // Example:
                     //   e.g io.println(foo)
-                    yield id;
+                    yield "invokestatic(" + id;
                 } else {
-                    yield id;
+                    final Type idType = TypeUtils.getExprType(firstChild, table);
+
+                    yield "invokevirtual(" + id + "." + idType.getName();
                 }
             }
-            case "VarRefExpr" -> "this";
+            case "VarRefExpr" -> "invokevirtual(this, ";
             default -> throw new IllegalStateException("Invalid first child node of a method");
         };
 
@@ -121,11 +121,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
 
         final StringBuilder methodInvocationCode = new StringBuilder();
         {
-            // TODO(bartek): Differentiate between static and virtual method call
-            final String leadingCode = "invokestatic" + L_PAREN;
-            methodInvocationCode.append(leadingCode);
-
-            final Stream<String> leading = Stream.of(receiver, "\"" + methodName + "\"");
+            final Stream<String> leading = Stream.of(invocationCode, "\"" + methodName + "\"");
             final Stream<String> args = node.getChildrenStream().skip(1).map(child -> visit(child).getCode()); // Visit more JmmNode children to get the actuals
             methodInvocationCode.append(Stream.concat(leading, args).collect(Collectors.joining(", ")));
             methodInvocationCode.append(R_PAREN);
