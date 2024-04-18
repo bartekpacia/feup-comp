@@ -32,11 +32,10 @@ public class Launcher {
         JmmParserResult parserResult = parser.parse(code, config);
         TestUtils.noErrors(parserResult.getReports());
 
-        // Print AST
         System.out.println("\n---ROOT JMM NODE (AST)---\n");
         System.out.println(parserResult.getRootNode().toTree());
 
-        // Semantic Analysis stage
+        // Semantic analysis stage
         JmmAnalysisImpl sema = new JmmAnalysisImpl();
         JmmSemanticsResult semanticsResult = sema.semanticAnalysis(parserResult);
         TestUtils.noErrors(semanticsResult.getReports());
@@ -49,7 +48,6 @@ public class Launcher {
         OllirResult ollirResult = ollirGen.toOllir(semanticsResult);
         TestUtils.noErrors(ollirResult.getReports());
 
-        // Print OLLIR code
         System.out.println("\n---OLLIR CODE---\n");
         System.out.println(ollirResult.getOllirCode());
 
@@ -58,8 +56,8 @@ public class Launcher {
         JasminResult jasminResult = jasminGen.toJasmin(ollirResult);
         TestUtils.noErrors(jasminResult.getReports());
 
-        // Print Jasmin code
-        // System.out.println(jasminResult.getJasminCode());
+        System.out.println("\n---JASMIN CODE---\n");
+        System.out.println(jasminResult.getJasminCode());
     }
 
 }
