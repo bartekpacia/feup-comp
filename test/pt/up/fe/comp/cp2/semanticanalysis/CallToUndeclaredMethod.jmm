@@ -9,7 +9,6 @@ class CallToUndeclaredMethod {
         a = new CallToUndeclaredMethod();
 
         a.bar();
-        a.foo();
 
         return 0;
     }

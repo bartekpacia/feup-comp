@@ -32,6 +32,7 @@ public class VarArgCheck extends AnalysisVisitor {
                 );
             }
         }
+
         return null;
     }
 }

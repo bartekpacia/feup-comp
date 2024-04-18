@@ -15,13 +15,12 @@ import pt.up.fe.specs.util.SpecsCheck;
 
 public class ImportCheck extends AnalysisVisitor {
     private String currentMethod;
-    private String superclass;
+
 
     @Override
     public void buildVisitor() {
-        //addVisit(Kind.CLASS_DECL,this::dealWithClass);
+        addVisit("Identifier",this::dealWithImportedAssignment);
         addVisit(Kind.METHOD_DECL, this::dealWithMethod);
-        addVisit("AssignStmt", this::dealWithImportedAssignment);
 
     }
 
@@ -31,20 +30,40 @@ public class ImportCheck extends AnalysisVisitor {
         return null;
     }
 
-    /*
-    private Void dealWithClass(JmmNode node, SymbolTable table) {
-
-        superclass = node.get("superClass");
-        //System.out.println(superclass);
-        return null;
-    }
-
-     */
-
     private Void dealWithImportedAssignment(JmmNode node, SymbolTable table) {
+        //System.out.println("---------------------------------------");
+        //System.out.println(node.get("id"));
+
+        //System.out.println("VARIAVEIS DECLARADAS");
+        for(var local : table.getLocalVariables(currentMethod)){
+            //System.out.println(x.getName());
+            if(node.get("id").equals(local.getName())){
+                //System.out.println("A VARIAVEL EXISTE NA FUNCAO");
+                return null;
+            }
+        }
+
+        for (var param : table.getParameters(currentMethod)) {
+            if(node.get("id").equals(param.getName())){
+                return null;
+            }
+        }
+
+        for (var field : table.getFields()) {
+            if(node.get("id").equals(field.getName())){
+                return null;
+            }
+        }
+
+        if(!table.getImports().contains(node.get("id"))){
+            var message = String.format("Class %s has not been imported", node.get("id"));
+            addReport(Report.newError(Stage.SEMANTIC, 5, 5, message, null));
+        }
+
+        // System.out.println("---------------------------------------");
+
 
         return null;
     }
-
 
 }
