@@ -29,6 +29,7 @@ CLASS : 'class' ;
 INT : 'int' ;
 STRING : 'String';
 BOOL : 'boolean';
+VARARG: 'int...';
 TRUE : 'true';
 FALSE: 'false';
 THIS: 'this';
@@ -72,7 +73,7 @@ varDecl
 //lacks 1 of them
 type locals[boolean isArray=false, boolean isVarArg=false]
     : name=INT (RSQPAREN LSQPAREN{$isArray=true;})?
-    | name=INT WS? '...'{$isVarArg=true;}
+    | name=VARARG{$isVarArg=true;}
     | name=BOOL
     | name = ('String' | ID )
     | name = VOID
