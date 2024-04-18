@@ -24,8 +24,19 @@ public class MethodCheck extends AnalysisVisitor {
     }
 
     private Void dealWithCalltoUndeclaredMethod(JmmNode node, SymbolTable table) {
-        System.out.println(table.getMethods());
-        System.out.println(node);
+
+        //THIS IS FOR TEST CallToUndeclraredMethods
+
+        if(!table.getMethods().contains(node.get("name"))){  // checks if the method beeing called has been declared in this clas before
+
+            if(!table.getImports().contains(TypeUtils.getExprType(node.getJmmChild(0),table).getName())){  // checks if the method beeing called doesnt bellong to a class that has been imporeted
+                var message = String.format("function beeing called hasnt been declared");
+                addReport(Report.newError(Stage.SEMANTIC, 5, 5, message, null));
+                return null;
+
+            }
+
+        }
         return null;
     }
 }
