@@ -25,6 +25,7 @@ public enum Kind {
     INTEGER_LITERAL,
     NEW_INT_ARR,
     VAR_REF_EXPR,
+    VARARG,
     IDENTIFIER,
     ARR_REF_EXPR,
     ARRAY_INDEX,

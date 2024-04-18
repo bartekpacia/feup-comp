@@ -14,6 +14,7 @@ import pt.up.fe.specs.util.SpecsCheck;
 public class TypeCheck extends AnalysisVisitor {
 
     private String currentMethod;
+    private JmmNode currentMethodNode;
 
     @Override
     public void buildVisitor() {
@@ -24,11 +25,30 @@ public class TypeCheck extends AnalysisVisitor {
         addVisit(Kind.ASSIGN_STMT, this::visitAssignStmt); // Assignments
         //addVisit(Kind.ARR_REF_EXPR, this::visitArrRefExpr); //Array ref
         addVisit(Kind.RETURN_STMT, this::visitReturnStmt); //Returns
+        addVisit(Kind.VAR_REF_EXPR, this::visitVarRefExpr); //Variable reference
     }
 
+    private Void visitVarRefExpr(JmmNode node, SymbolTable table) {
+        if(currentMethodNode.get("isStatic").equals("false")) {
+            return null;
+        }
+
+        var message = String.format("Variable '%s' does not exist.", node.get("id"));
+        addReport(Report.newError(
+                Stage.SEMANTIC,
+                NodeUtils.getLine(node),
+                NodeUtils.getColumn(node),
+                message,
+                null)
+        );
+
+        return null;
+    }
     private Void visitArithOp(JmmNode node, SymbolTable table) {
-        JmmNode leftNode = node.getChild(0);
-        if (leftNode.getKind().equals("IntegerLiteral") && leftNode.getKind().equals("IntegerLiteral")) {
+        var leftType = TypeUtils.getExprType(node.getChild(0),table);
+        var rightType = TypeUtils.getExprType(node.getChild(1),table);
+
+        if (leftType.getName().equals("int") && rightType.getName().equals("int")) {
             return null;
         }
 
@@ -39,17 +59,21 @@ public class TypeCheck extends AnalysisVisitor {
         return null;
     }
     private Void visitMethodDecl(JmmNode method, SymbolTable table) {
+        currentMethodNode = method;
         currentMethod = method.get("name");
         return null;
     }
 
     private Void visitCondOp(JmmNode node, SymbolTable table) {
-        JmmNode leftNode = node.getChild(0);
+        var leftType = TypeUtils.getExprType(node.getChild(0),table);
         if(!node.getKind().equals("NOT_OP")) {
-            JmmNode rightNode = node.getChild(1);
+            var rightType = TypeUtils.getExprType(node.getChild(1),table);
+            if (leftType.getName().equals("bool") && rightType.getName().equals("bool")) {
+                return null;
+            }
         }
 
-        if (leftNode.getKind().equals("Bool") && leftNode.getKind().equals("Bool")) {
+        if (leftType.getName().equals("bool")) {
             return null;
         }
 
