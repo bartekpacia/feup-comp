@@ -136,7 +136,7 @@ public class TypeCheck extends AnalysisVisitor {
 
     private boolean varIsReturnType(JmmNode var, SymbolTable table) {
         SpecsCheck.checkNotNull(currentMethod, () -> "Expected current method to be set");
-        //TODO(goncalo) Not sure if 100% correct but avoids a private test
+        //TODO(goncalo) Not sure if 100% correct but avoids a private test - also fix the spaghetti nesting.
         if(currentMethodNode.get("isStatic").equals("false")) {
             for (var field : table.getFields()) {
                 if (field.getName().equals(var.get("id"))) {
