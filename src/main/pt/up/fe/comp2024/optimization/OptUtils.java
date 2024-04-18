@@ -40,7 +40,8 @@ public class OptUtils {
             case "int" -> "i32";
             case "boolean" -> "bool";
             case "void" -> "V";
-            default -> throw new NotImplementedException(typeName);
+            // Assume this is a user-defined class
+            default -> typeName;
         };
     }
 

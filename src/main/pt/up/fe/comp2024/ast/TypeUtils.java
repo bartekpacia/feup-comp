@@ -112,6 +112,11 @@ public class TypeUtils {
 
                 yield localType;
             }
+            case NEW_OBJECT -> {
+                final String className = expr.get("id");
+
+                yield new Type(className, false);
+            }
             default -> throw new UnsupportedOperationException("Can't compute type for expression kind '" + kind + "'");
         };
     }
