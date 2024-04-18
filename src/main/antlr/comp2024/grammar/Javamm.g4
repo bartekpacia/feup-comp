@@ -121,7 +121,7 @@ expr
     | id = ID #Identifier
     | name=THIS #VarRefExpr
     | 'new' 'int' '[' expr ']' #NewIntArr
-    | 'new' id = ID '(' ')'  #NewClass
+    | 'new' id = ID '(' ')'  #NewObject
     | TRUE #BoolExpr
     | FALSE #BoolExpr
     | THIS #ThisExpr
