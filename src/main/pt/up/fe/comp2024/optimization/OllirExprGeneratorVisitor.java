@@ -141,11 +141,21 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
             methodInvocationCode.append(String.join(", ", codes));
             methodInvocationCode.append(R_PAREN);
         }
+        if(returnType.equals(".V")) {
+            code.append(methodInvocationCode);
+            code.append(returnType);
 
-        code.append(methodInvocationCode);
-        code.append(returnType);
+            return new OllirExprResult(code.toString());
+        }
+        var computation = new StringBuilder();
+        var temp = OptUtils.getTemp();
+        computation.append(temp).append(returnType).append(SPACE)
+                .append(ASSIGN).append(returnType).append(SPACE)
+                .append(methodInvocationCode).append(returnType).append(END_STMT);
 
-        return new OllirExprResult(code.toString());
+        code.append(temp).append(returnType);
+
+        return new OllirExprResult(code.toString(), computation);
     }
 
     private OllirExprResult visitNewObjectExpr(JmmNode node, Void unused) {
