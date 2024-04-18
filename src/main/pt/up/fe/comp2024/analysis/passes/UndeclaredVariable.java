@@ -38,8 +38,13 @@ public class UndeclaredVariable extends AnalysisVisitor {
         for (var tableImport : table.getImports()) {
             System.out.println(tableImport);
             System.out.println(node.get("name"));
-            System.out.println("this is it");
             if (tableImport.equals(table.getSuper()) || tableImport.equals(type.getName())) {
+                return null;
+            }
+
+            // Check if method comes from an imported class
+            final JmmNode childNode = node.getChild(0);
+            if (childNode.getOptional("id").isPresent() && childNode.getOptional("id").get().equals(tableImport)) {
                 return null;
             }
         }
