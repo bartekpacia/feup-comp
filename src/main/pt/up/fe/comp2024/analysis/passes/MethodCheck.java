@@ -22,7 +22,7 @@ public class MethodCheck extends AnalysisVisitor {
     private JmmNode sclass;
     @Override
     public void buildVisitor() {
-        addVisit("IdUseExpr",this::dealWithCalltoUndeclaredMethod);
+        addVisit(Kind.ID_USE_EXPR,this::dealWithCalltoUndeclaredMethod);
         addVisit(Kind.CLASS_DECL,this::classDec);
 
 
