@@ -10,20 +10,29 @@ public enum Kind {
     PROGRAM,
     IMPORT_DECL,
     CLASS_DECL,
+    NEW_CLASS,
     VAR_DECL,
     TYPE,
     METHOD_DECL,
     PARAM,
     ASSIGN_STMT,
+    ARRAY_ASSIGN_STMT,
     RETURN_STMT,
     BINARY_EXPR,
-    BINARY_OP,
+    BOOL_OP,
+    BOOL,
+    NOT_OP,
     INTEGER_LITERAL,
+    NEW_INT_ARR,
     VAR_REF_EXPR,
     IDENTIFIER,
+    ARR_REF_EXPR,
+    ARRAY_INDEX,
+    VARARG,
     ID_USE_EXPR, // TODO(bartek): Rename to METHOD_CALL_EXPR
     EXPRESSION_STMT, // TODO(bartek): Rename to EXPR
     NEW_OBJECT;
+
 
     private static final Set<Kind> STATEMENTS = Set.of(ASSIGN_STMT, RETURN_STMT);
     private static final Set<Kind> EXPRESSIONS = Set.of(BINARY_EXPR, INTEGER_LITERAL, VAR_REF_EXPR);
