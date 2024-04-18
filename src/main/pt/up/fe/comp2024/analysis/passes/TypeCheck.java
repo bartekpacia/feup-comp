@@ -32,13 +32,9 @@ public class TypeCheck extends AnalysisVisitor {
             return null;
         }
 
+
         var message = String.format("Variable '%s' does not exist.", node.getChild(0));
-        addReport(Report.newError(
-                Stage.SEMANTIC,
-                NodeUtils.getLine(node),
-                NodeUtils.getColumn(node),
-                message,
-                null)
+        addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(node), NodeUtils.getColumn(node), message, null)
         );
         return null;
     }
@@ -78,13 +74,11 @@ public class TypeCheck extends AnalysisVisitor {
             return null;
         }
 
+        System.out.println("HEREEEEEEEEE");
+        System.out.println(node);
+
         var message = String.format("Variable '%s' does not exist.", node.getChild(0));
-        addReport(Report.newError(
-                Stage.SEMANTIC,
-                NodeUtils.getLine(node),
-                NodeUtils.getColumn(node),
-                message,
-                null)
+        addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(node), NodeUtils.getColumn(node), message, null)
         );
 
         return null;
