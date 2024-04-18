@@ -13,6 +13,12 @@ import static org.junit.Assert.assertEquals;
 
 public class JasminTest {
 
+// TODO(bartek): Make this pass
+//    @Test
+//    public void ollirToJasminSimple() {
+//        testOllirToJasmin("pt/up/fe/comp/cp2/apps/example_ollir/Simple.ollir");
+//    }
+
     @Test
     public void ollirToJasminBasic() {
         testOllirToJasmin("pt/up/fe/comp/cp2/jasmin/OllirToJasminBasic.ollir");
@@ -54,7 +60,7 @@ public class JasminTest {
 
         
         var testName = new File(resource).getName();
-        System.out.println(testName + ":\n" + result.getJasminCode());
+        System.out.println("Running test: " + testName + ":\n" + result.getJasminCode());
         var runOutput = result.runWithFullOutput();
         assertEquals("Error while running compiled Jasmin: " + runOutput.getOutput(), 0, runOutput.getReturnValue());
         System.out.println("\n Result: " + runOutput.getOutput());
