@@ -21,8 +21,29 @@ public class UndeclaredVariable extends AnalysisVisitor {
     @Override
     public void buildVisitor() {
         addVisit(Kind.METHOD_DECL, this::visitMethodDecl);
+        addVisit(Kind.ID_USE_EXPR, this::visitIDUseExpr);
         addVisit(Kind.BINARY_EXPR, this::visitOp);
         addVisit(Kind.RETURN_STMT, this::visitReturnStmt);
+    }
+
+    private Void visitIDUseExpr(JmmNode node, SymbolTable table) {
+
+        for (var method : table.getMethods()) {
+            if (method.equals(node.get("name"))) {
+                return null;
+            }
+        }
+
+        var message = String.format("Variable '%s' does not exist.", node.getChild(0));
+        addReport(Report.newError(
+                Stage.SEMANTIC,
+                NodeUtils.getLine(node),
+                NodeUtils.getColumn(node),
+                message,
+                null)
+        );
+
+        return null;
     }
 
     private Void visitOp(JmmNode op, SymbolTable table) {
@@ -152,7 +173,21 @@ public class UndeclaredVariable extends AnalysisVisitor {
 
     private Void visitMethodDecl(JmmNode method, SymbolTable table) {
         currentMethod = method.get("name");
+        method.toTree();
+        for (var tableMethod : table.getMethods()) {
+            if (tableMethod.equals(currentMethod)) {
+                return null;
+            }
+        }
 
+        var message = String.format("Variable '%s' does not exist.", method.getChild(0));
+        addReport(Report.newError(
+                Stage.SEMANTIC,
+                NodeUtils.getLine(method),
+                NodeUtils.getColumn(method),
+                message,
+                null)
+        );
         return null;
     }
 }
