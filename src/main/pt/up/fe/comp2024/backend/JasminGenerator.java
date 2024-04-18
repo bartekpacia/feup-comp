@@ -91,7 +91,7 @@ public class JasminGenerator {
         code.append(defaultConstructor);
 
         // generate code for all other methods
-        for (var method : ollirResult.getOllirClass().getMethods()) {
+        for (final Method method : ollirResult.getOllirClass().getMethods()) {
 
             // Ignore constructor, since there is always one constructor
             // that receives no arguments, and has been already added
@@ -137,8 +137,8 @@ public class JasminGenerator {
         code.append(TAB).append(".limit stack 99").append(NL);
         code.append(TAB).append(".limit locals 99").append(NL);
 
-        for (var inst : method.getInstructions()) {
-            var instCode = StringLines.getLines(generators.apply(inst)).stream()
+        for (final Instruction inst : method.getInstructions()) {
+            final String instCode = StringLines.getLines(generators.apply(inst)).stream()
                     .collect(Collectors.joining(NL + TAB, TAB, NL));
 
             code.append(instCode);
@@ -159,14 +159,14 @@ public class JasminGenerator {
         code.append(generators.apply(assign.getRhs()));
 
         // store value in the stack in destination
-        var lhs = assign.getDest();
+        final Element lhs = assign.getDest();
 
         if (!(lhs instanceof Operand operand)) {
             throw new NotImplementedException(lhs.getClass());
         }
 
         // get register
-        var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
+        final int reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
 
         final var elementType = lhs.getType().getTypeOfElement();
         final String storeOpcode = switch (elementType) {
@@ -190,7 +190,7 @@ public class JasminGenerator {
 
     private String generateOperand(Operand operand) {
         // get register
-        var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
+        final int reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
         return "iload " + reg + NL;
     }
 
@@ -202,7 +202,7 @@ public class JasminGenerator {
         code.append(generators.apply(binaryOp.getRightOperand()));
 
         // apply operation
-        var op = switch (binaryOp.getOperation().getOpType()) {
+        final String op = switch (binaryOp.getOperation().getOpType()) {
             case ADD -> "iadd";
             case MUL -> "imul";
             default -> throw new NotImplementedException(binaryOp.getOperation().getOpType());
@@ -272,9 +272,7 @@ public class JasminGenerator {
                 final String methodname = ((LiteralElement) callInst.getMethodName()).getLiteral().replace("\"", "");
                 final String descriptor = "()V";
 
-
                 code.append("invokespecial ").append(classname).append("/").append(methodname).append(descriptor).append(NL);
-                // int register = ollirResult.getOllirClass().getMethod(1).getVarTable().get().getVirtualReg();
 
             }
             case invokestatic -> {
@@ -305,7 +303,7 @@ public class JasminGenerator {
         // putfield ClassName/fieldName I
         // code.append("putfield ").append();
 
-        for (final var operand : putFieldInst.getOperands()) {
+        for (final Element operand : putFieldInst.getOperands()) {
             System.out.println("operand: " + operand.toString());
         }
 
