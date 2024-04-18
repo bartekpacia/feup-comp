@@ -101,9 +101,7 @@ public class TypeUtils {
 
                 // Search for identifier in method's parameters
                 final List<Symbol> params = new ArrayList<>(table.getParameters(methodName));
-                for (int i = 0; i < params.size(); i++) {
-                    final Symbol param = params.get(i);
-
+                for (final Symbol param : params) {
                     if (param.getName().equals(ident)) {
                         // FIXME(bartek): Ugly hack to reference actuals. Working around the need of prefixing with $ and actual's index.
                         //  Code from OllirExprGeneratorVisitor#visitIdentifier() should actually be here.
@@ -116,7 +114,8 @@ public class TypeUtils {
                 final List<String> imports = new ArrayList<>(table.getImports());
                 for (final String imp : imports) {
                     if (imp.equals(ident)) {
-                        // TODO(
+                        // TODO(bartek): It's possible that it should not be VOID_TYPE_NAME, but an empty string.
+                        //  No time to verify this though.
                         localType = new Type(VOID_TYPE_NAME, false);
                         break;
                     }
