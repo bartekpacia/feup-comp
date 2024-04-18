@@ -6,6 +6,7 @@ import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.ast.PreorderJmmVisitor;
 import pt.up.fe.comp2024.ast.TypeUtils;
 
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -68,11 +69,10 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
     }
 
     private OllirExprResult visitVarRef(JmmNode node, Void unused) {
-        var id = node.get("name");
-        Type type = TypeUtils.getExprType(node, table);
-        String ollirType = OptUtils.toOllirType(type);
+//        .
 
-        String code = id + ollirType;
+        // String code = id + ollirType;
+        String code = "this";
 
         return new OllirExprResult(code);
     }
@@ -91,8 +91,28 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
 
         final String methodName = node.get("name");
 
-        // First child of IdUseExpr is the package where the method comes from
-        final String packageName = node.getChild(0).get("id");
+        // First child of IdUseExpr is:
+        //  * Identifier:
+        //   * the receiver, a.k.a the object that the method is called on: obj.foo(bar)
+        //  * VarRefExpr ("this"), in case it is a virtual method
+        final JmmNode firstChild = node.getChild(0);
+        final String receiver = switch (firstChild.getKind()) {
+            case "Identifier" -> {
+                final String id = firstChild.get("id");
+                // bartek: Is this needed?
+                final boolean receiverIsImport = table.getImports().stream().anyMatch(importName -> importName.equals(id));
+
+                if (receiverIsImport) {
+                    // Static call on an imported class, e.g io.println(foo)
+                } else {
+
+                }
+
+                yield id;
+            }
+            case "VarRefExpr" -> "this";
+            default -> throw new IllegalStateException("Invalid first child node of a method");
+        };
 
         final StringBuilder code = new StringBuilder();
 
@@ -102,7 +122,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
             final String leadingCode = "invokestatic" + L_PAREN;
             methodInvocationCode.append(leadingCode);
 
-            final Stream<String> leading = Stream.of(packageName, "\"" + methodName + "\"");
+            final Stream<String> leading = Stream.of(receiver, "\"" + methodName + "\"");
             final Stream<String> args = node.getChildrenStream().skip(1).map(child -> visit(child).getCode()); // Visit more JmmNode children to get the actuals
             methodInvocationCode.append(Stream.concat(leading, args).collect(Collectors.joining(", ")));
             methodInvocationCode.append(R_PAREN);
