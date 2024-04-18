@@ -31,14 +31,13 @@ public class UndecleclaretionCheck extends AnalysisVisitor {
     }
 
     private Void varDeclCheckDeclaration(JmmNode node, SymbolTable table) {
-        //System.out.println("HEREEEEEEEEEE");
-        //System.out.println(node);
-        // System.out.println(node.getChild(0).get("name"));
-        if(node.getChild(0).get("name").equals("int") || node.getChild(0).get("name").equals("boolean") || node.getChild(0).get("name").equals("String")){
+        final var varType = node.getChild(0).get("name");
+        final var methods = table.getMethods();
+        if(varType.equals("int") || varType.equals("boolean") || varType.equals("String")){
             return null;
         }
 
-        if(!table.getMethods().contains((node.getChild(0).get("name")))){
+        if(!methods.contains(varType)){
             var message = String.format("Method in Vardeclaration does not exist" );
             addReport(Report.newError(Stage.SEMANTIC, 5, 5, message, null));
             return null;

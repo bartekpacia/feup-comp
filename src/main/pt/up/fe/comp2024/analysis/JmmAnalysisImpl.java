@@ -19,7 +19,8 @@ public class JmmAnalysisImpl implements JmmAnalysis {
     private final List<AnalysisPass> analysisPasses;
 
     public JmmAnalysisImpl() {
-        this.analysisPasses = List.of(new UndeclaredVariable(), new TypeCheck(), new ArrayCheck(),new ConditionaCheck(), new ImportCheck(),new MethodCheck(), new VarArgCheck());
+        this.analysisPasses = List.of(new UndeclaredVariable(), new TypeCheck(), new ArrayCheck(),new ConditionaCheck(),
+                new ImportCheck(),new MethodCheck(), new VarArgCheck());
     }
 
     @Override

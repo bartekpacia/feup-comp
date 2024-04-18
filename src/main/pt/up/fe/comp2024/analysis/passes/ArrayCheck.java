@@ -18,7 +18,6 @@ public class ArrayCheck extends AnalysisVisitor {
         addVisit(Kind.METHOD_DECL, this::visitMethodDecl);
         addVisit(Kind.ARR_REF_EXPR, this::visitNewIntArr);
         addVisit(Kind.ARRAY_INDEX, this::visitArrIdx);
-        /*addVisit(Kind.RETURN_STMT, this::visitReturnStmt);*/
     }
 
     private Void visitArrIdx(JmmNode node, SymbolTable table) {

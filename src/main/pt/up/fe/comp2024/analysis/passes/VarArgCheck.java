@@ -17,10 +17,11 @@ public class VarArgCheck extends AnalysisVisitor {
     }
     
     private Void visitMethodDecl(JmmNode node, SymbolTable table) {
-        var params = table.getParameters(node.get("name"));
-        var lastIdx = params.size()-1;
+        final var params = table.getParameters(node.get("name"));
+        final var lastIdx = params.size()-1;
         for (var param : params) {
-            if((params.get(lastIdx) != param) && (param.getType().getName().equals("int..."))) {
+            var paramType = param.getType().getName();
+            if((params.get(lastIdx) != param) && (paramType.equals("int..."))) {
                 var message = String.format("Variable '%s' does not exist - vararg_methodvisit", node);
                 addReport(Report.newError(
                         Stage.SEMANTIC,

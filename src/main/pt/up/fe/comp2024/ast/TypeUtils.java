@@ -8,7 +8,6 @@ import pt.up.fe.comp.jmm.ast.JmmNode;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.sun.source.tree.Tree.Kind.NEW_CLASS;
 import static pt.up.fe.comp2024.ast.Kind.ASSIGN_STMT;
 import static pt.up.fe.comp2024.ast.Kind.METHOD_DECL;
 
@@ -137,13 +136,13 @@ public class TypeUtils {
     }
 
     private static Type getVarExprType(JmmNode varRefExpr, SymbolTable table) {
-        String varName = varRefExpr.get("name");
+        final String varName = varRefExpr.get("name");
 
         String currentMethod = varRefExpr.getAncestor(METHOD_DECL).orElseThrow().get("name");
 
-        var fields = table.getFields();
-        var params = table.getParameters(currentMethod);
-        var locals = table.getLocalVariables(currentMethod);
+        final var fields = table.getFields();
+        final var params = table.getParameters(currentMethod);
+        final var locals = table.getLocalVariables(currentMethod);
 
         // Check if the variable is a field
         for (var field : fields) {
