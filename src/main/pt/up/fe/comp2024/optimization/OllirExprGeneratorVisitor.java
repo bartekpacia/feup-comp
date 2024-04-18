@@ -2,6 +2,7 @@ package pt.up.fe.comp2024.optimization;
 
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
+import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.ast.PreorderJmmVisitor;
 import pt.up.fe.comp2024.ast.TypeUtils;
@@ -31,6 +32,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         addVisit(INTEGER_LITERAL, this::visitInteger);
         addVisit(IDENTIFIER, this::visitIdentifier);
         addVisit(ID_USE_EXPR, this::visitMethodCallExpr);
+        addVisit(NEW_OBJECT, this::visitNewObjectExpr);
 
         setDefaultVisit(this::defaultVisit);
     }
@@ -103,12 +105,13 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
                 final boolean receiverIsImport = table.getImports().stream().anyMatch(importName -> importName.equals(id));
 
                 if (receiverIsImport) {
-                    // Static call on an imported class, e.g io.println(foo)
+                    // Receiver is an imported class.
+                    // Example:
+                    //   e.g io.println(foo)
+                    yield id;
                 } else {
-
+                    yield id;
                 }
-
-                yield id;
             }
             case "VarRefExpr" -> "this";
             default -> throw new IllegalStateException("Invalid first child node of a method");
@@ -132,6 +135,12 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         code.append(returnType);
 
         return new OllirExprResult(code.toString());
+    }
+
+    private OllirExprResult visitNewObjectExpr(JmmNode node, Void unused) {
+        final String type = node.get("id");
+        final String code = "new" + "(" + type + ")" + "." + type;
+        return new OllirExprResult(code);
     }
 
     /**

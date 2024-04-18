@@ -228,7 +228,6 @@ public class JasminGenerator {
     }
 
     private String generateCall(CallInstruction callInst) {
-        // TODO(bartek): Implement
         final StringBuilder code = new StringBuilder();
 
         switch (callInst.getInvocationType()) {
@@ -264,7 +263,8 @@ public class JasminGenerator {
                 // The difference to invokevirtual is that invokespecial is resolved at compile time.
 
                 // The first argument to invokespecial is an objectref.
-                // We assume
+
+                // We assume that we can call "dup" – or can we?
 
                 final Operand operand = ((Operand) callInst.getCaller());
                 final String classname = ((ClassType) operand.getType()).getName();
@@ -275,6 +275,7 @@ public class JasminGenerator {
 
             }
             case invokestatic -> {
+                // final String classname = ((ClassType) callInst.getCaller().getType()).getName();
                 final String classname = ((Operand) callInst.getCaller()).getName();
                 final String methodname = ((LiteralElement) callInst.getMethodName()).getLiteral().replace("\"", "");
                 final String descriptor = "()V";
