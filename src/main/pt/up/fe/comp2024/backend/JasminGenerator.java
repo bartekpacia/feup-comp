@@ -30,7 +30,6 @@ public class JasminGenerator {
     String code;
 
     Method currentMethod;
-    private int depth;
 
     private final FunctionClassMap<TreeNode, String> generators;
 
@@ -40,7 +39,6 @@ public class JasminGenerator {
         reports = new ArrayList<>();
         code = null;
         currentMethod = null;
-        depth = -3;
 
         // Each of these visitors must be stack-neutral.
         this.generators = new FunctionClassMap<>();
