@@ -126,14 +126,20 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         var name = node.get("name");
         code.append(name);
 
-        // Generate parameters
-        code.append("(");
-        final String methodSignatureCode = node.getChildrenStream()
-                .filter((childNode) -> childNode.getKind().equals("Param"))
-                .map(this::visit)
-                .collect(Collectors.joining(", "));
-        code.append(methodSignatureCode);
 
+        code.append("(");
+        if (name.equals("main")) {
+            // MainMethod has hardcoded parameters
+            // TODO(bartek): Once we support array parameters in grammar, this should be unified.
+            code.append("args.array.String");
+        } else {
+            // Generate parameters in a normal way
+            final String methodSignatureCode = node.getChildrenStream()
+                    .filter((childNode) -> childNode.getKind().equals("Param"))
+                    .map(this::visit)
+                    .collect(Collectors.joining(", "));
+            code.append(methodSignatureCode);
+        }
         code.append(")");
 
         // type
@@ -150,7 +156,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         // Make sure to add ReturnStmt, even if it's not present in the AST.
         boolean hasReturnStmt = node.getChildrenStream()
-            .anyMatch((childNode) -> childNode.getKind().equals("ReturnStmt"));
+                .anyMatch((childNode) -> childNode.getKind().equals("ReturnStmt"));
         if (!hasReturnStmt) {
             code.append("ret.V").append(END_STMT);
         }
