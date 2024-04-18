@@ -53,7 +53,7 @@ public class TypeCheck extends AnalysisVisitor {
         }
 
 
-        var message = String.format("Variable '%s' does not exist.", node.getChild(0));
+        var message = String.format("Variable '%s' does not exist - type_arithopvisit", node.getChild(0));
         addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(node), NodeUtils.getColumn(node), message, null)
         );
         return null;
@@ -77,7 +77,7 @@ public class TypeCheck extends AnalysisVisitor {
             return null;
         }
 
-        var message = String.format("Variable '%s' does not exist.", node.getChild(0));
+        var message = String.format("Variable '%s' does not exist - type_condopvisit", node.getChild(0));
         addReport(Report.newError(
                 Stage.SEMANTIC,
                 NodeUtils.getLine(node),
@@ -98,10 +98,7 @@ public class TypeCheck extends AnalysisVisitor {
             return null;
         }
 
-        System.out.println("HEREEEEEEEEE");
-        System.out.println(node);
-
-        var message = String.format("Variable '%s' does not exist.", node.getChild(0));
+        var message = String.format("Variable '%s' does not exist - type_assignopvisit", node.getChild(0));
         addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(node), NodeUtils.getColumn(node), message, null)
         );
 
@@ -119,9 +116,10 @@ public class TypeCheck extends AnalysisVisitor {
             return null;
         } else if (returnVar.getKind().equals("Identifier") && varIsReturnType(returnVar, table)) {
             return null;
-        }
+        } else if (returnVar.getKind().equals("ArrayIndex")) {
+            return null; }
 
-        var message = String.format("Variable '%s' does not exist.", stmt.getChild(0));
+        var message = String.format("Variable '%s' does not exist - type_retpvisit", stmt.getChild(0));
         addReport(Report.newError(
                 Stage.SEMANTIC,
                 NodeUtils.getLine(stmt),

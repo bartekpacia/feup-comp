@@ -7,6 +7,7 @@ import pt.up.fe.comp.jmm.report.Stage;
 import pt.up.fe.comp2024.analysis.AnalysisVisitor;
 import pt.up.fe.comp2024.ast.Kind;
 import pt.up.fe.comp2024.ast.NodeUtils;
+import pt.up.fe.comp2024.ast.TypeUtils;
 import pt.up.fe.specs.util.SpecsCheck;
 
 /**
@@ -34,7 +35,7 @@ public class UndeclaredVariable extends AnalysisVisitor {
             }
         }
 
-        var message = String.format("Variable '%s' does not exist.", node.getChild(0));
+        var message = String.format("Variable '%s' does not exist - undv_thisvisit", node.getChild(0));
         addReport(Report.newError(
                 Stage.SEMANTIC,
                 NodeUtils.getLine(node),
@@ -122,7 +123,7 @@ public class UndeclaredVariable extends AnalysisVisitor {
             }
         }
 
-        var message = String.format("Variable '%s' does not exist.", op.getChild(0));
+        var message = String.format("Variable '%s' does not exist - undv_opvisit", op.getChild(0));
         addReport(Report.newError(
                 Stage.SEMANTIC,
                 NodeUtils.getLine(op),
@@ -135,6 +136,7 @@ public class UndeclaredVariable extends AnalysisVisitor {
     }
     private Void visitReturnStmt(JmmNode stmt, SymbolTable table) {
         JmmNode returnVar = stmt.getChild(0);
+
         if (returnVar.getKind().equals("IntegerLiteral")) {
             return null;
         } else if (returnVar.getKind().equals("Identifier")) {
@@ -157,9 +159,11 @@ public class UndeclaredVariable extends AnalysisVisitor {
                         .anyMatch(varDecl -> varDecl.getName().equals(returnVar.get("id")))) {
                     return null;
                 }
+        } else if (returnVar.getKind().equals("ArrayIndex") ) {
+            return null;
         }
 
-        var message = String.format("Variable '%s' does not exist.", stmt.getChild(0));
+        var message = String.format("Variable '%s' does not exist - undv_retvisit", stmt.getChild(0));
         addReport(Report.newError(
                 Stage.SEMANTIC,
                 NodeUtils.getLine(stmt),
@@ -180,7 +184,7 @@ public class UndeclaredVariable extends AnalysisVisitor {
             }
         }
 
-        var message = String.format("Variable '%s' does not exist.", method.getChild(0));
+        var message = String.format("Variable '%s' does not exist - undv_methodvisit", method.getChild(0));
         addReport(Report.newError(
                 Stage.SEMANTIC,
                 NodeUtils.getLine(method),

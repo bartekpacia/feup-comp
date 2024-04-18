@@ -17,13 +17,17 @@ public class VarArgCheck extends AnalysisVisitor {
     }
     
     private Void visitMethodDecl(JmmNode node, SymbolTable table) {
-        int lastIdx = table.getParameters(node.get("node")).size()-1;
-        for (int i = 0; i < table.getParameters(node.get("node")).size(); i++) {
+        int lastIdx = table.getParameters(node.get("name")).size()-1;
+        System.out.println(lastIdx);
+        for (int i = 0; i < table.getParameters(node.get("name")).size(); i++) {
             if(TypeUtils.getExprType(node,table).getName().equals("int...") && (i == lastIdx)) {
                 return null;
             }
         }
-        var message = String.format("Variable '%s' does not exist.", node.get("id"));
+
+        System.out.println(node.getChildren());
+
+        var message = String.format("Variable '%s' does not exist - vararg_methodvisit", node);
         addReport(Report.newError(
                 Stage.SEMANTIC,
                 NodeUtils.getLine(node),
