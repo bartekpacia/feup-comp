@@ -27,6 +27,7 @@ IMPORT : 'import';
 EXTENDS : 'extends';
 CLASS : 'class' ;
 INT : 'int' ;
+VARARG: 'int...';
 STRING : 'String';
 BOOL : 'boolean';
 TRUE : 'true';
@@ -70,9 +71,9 @@ varDecl
     ;
 
 //lacks 1 of them
-type locals[boolean isArray=false]
+type locals[boolean isArray=false, boolean isVarArg=false]
     : name=INT (RSQPAREN LSQPAREN{$isArray=true;})?
-    | name=INT WS? '...'
+    | name=VARARG{$isVarArg=true;}
     | name=BOOL
     | name = ('String' | ID )
     | name = VOID
@@ -93,7 +94,7 @@ stmt
     | 'while' '(' expr ')' stmt #WhileStmt
     | expr ';' #ExpressionStmt
     | id=ID '=' expr ';' #AssignStmt
-    | id=ID '[' expr ']' '=' expr ';' #AssignStmt
+    | id=ID '[' expr ']' '=' expr ';' #ArrayAssignStmt
     ;
 
 ifStatment
@@ -110,20 +111,20 @@ expr
     | RSQPAREN (expr (COL expr)*)? LSQPAREN #ArrRefExpr
     | expr DOT 'length' #LenCheckExpr
     | expr DOT name=ID LPAREN (expr (COL expr)*)? RPAREN #IdUseExpr
-    | op=NOT expr #BinaryExpr
+    | op=NOT expr #NotOp
     | expr (op='*' | op='/' ) expr  #BinaryExpr
     | expr (op='+' | op='-' ) expr #BinaryExpr
-    | expr (op='<'| op='>' ) expr #BoolExpr
-    | expr op = '&&' expr #AndOp
-    | expr op =  '||' expr #OrOp
+    | expr (op='<'| op='>' ) expr #BinaryExpr
+    | expr op = '&&' expr #BoolOp
+    | expr op =  '||' expr #BoolOp
     | expr '[' expr ']' #ArrayIndex
     | value=INTEGER #IntegerLiteral
     | id = ID #Identifier
     | name=THIS #VarRefExpr
     | 'new' 'int' '[' expr ']' #NewIntArr
     | 'new' id = ID '(' ')'  #NewClass
-    | TRUE #BoolExpr
-    | FALSE #BoolExpr
+    | value=TRUE #Bool
+    | value=FALSE #Bool
     | THIS #ThisExpr
     | name=ID #IDExpr
     | INT #INTExpr
