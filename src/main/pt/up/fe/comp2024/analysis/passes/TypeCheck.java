@@ -58,6 +58,17 @@ public class TypeCheck extends AnalysisVisitor {
     private Void visitMethodDecl(JmmNode method, SymbolTable table) {
         currentMethodNode = method;
         currentMethod = method.get("name");
+        if (method.get("isStatic").equals("true") && !method.get("name").equals("main")) {
+            var message = String.format("Variable '%s' does not exist - type_notmaistaticnvisit", method);
+            addReport(Report.newError(
+                    Stage.SEMANTIC,
+                    NodeUtils.getLine(method),
+                    NodeUtils.getColumn(method),
+                    message,
+                    null)
+            );
+            return null;
+        }
         return null;
     }
 
