@@ -47,33 +47,32 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     }
 
     private String visitAssignStmt(JmmNode node, Void unused) {
+        final String variableName = node.get("id");
+
         final JmmNode expressionNode = node.getChild(0);
-
-        final String lhs = node.get("id");
-
-        final OllirExprResult rhs = exprVisitor.visit(expressionNode);
+        final OllirExprResult exprResult = exprVisitor.visit(expressionNode);
 
         StringBuilder code = new StringBuilder();
 
-         // code.append(lhs.getComputation());
-         code.append(rhs.getComputation());
+        // OllirExprResult.code references temporaries from OllirExprResult.computation, so
+        // computation must be executed first.
+        // code.append(variableName.getComputation());
+        code.append(exprResult.getComputation());                           // tmp0.i32 :=.i32 a.i32 +.i32 b.i32;
 
-        // code to compute self
-        // statement has type of lhs
-        Type thisType = TypeUtils.getExprType(expressionNode, table);
-        String typeString = OptUtils.toOllirType(thisType);
+        // The statement has the same type as the type of variableName.
+        final Type type = TypeUtils.getExprType(expressionNode, table);
+        final String ollirType = OptUtils.toOllirType(type);
 
-        code.append(lhs);
-        code.append(typeString);
-        code.append(SPACE);
-
-        code.append(ASSIGN);
-        code.append(typeString);
-        code.append(SPACE);
-
-        code.append(rhs.getCode());
+        // For example: c.i32 := .i32 tmp0.i32;
+        code.append(variableName).append(ollirType).append(SPACE);          // c.i32
+        code.append(ASSIGN);                                                // :=
+        code.append(ollirType).append(SPACE).append(exprResult.getCode());  // .i32 tmp0.i32
 
         code.append(END_STMT);
+
+        System.out.println("DEBUG Generator.visitAssignStmt:");
+        System.out.println("DEBUG          code (below): ");
+        System.out.println(code);
 
         return code.toString();
     }
