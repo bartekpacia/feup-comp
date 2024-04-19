@@ -72,7 +72,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         computation.append(code);                                                     // tmp0.i32
         computation.append(SPACE).append(ASSIGN).append(SPACE);                       // :=
         computation.append(exprOllirType).append(SPACE).append(lhs.getCode());        // .i32 a.i32
-        computation.append(node.get("op")).append(SPACE);                             // +
+        computation.append(SPACE).append(node.get("op")).append(SPACE);                // +
         computation.append(exprOllirType).append(SPACE).append(rhs.getCode());        // .i32 b.i32
         computation.append(END_STMT);
 
@@ -113,10 +113,9 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
     }
 
     private OllirExprResult visitMethodCallExpr(JmmNode node, Void unused) {
-        final Type type = TypeUtils.getExprType(node, table);
-        final String returnType = OptUtils.toOllirType(type);
-
         final String methodName = node.get("name");
+        final Type returnType = TypeUtils.getExprType(node, table);
+        final String ollirType = OptUtils.toOllirType(returnType);
 
         // First child of IdUseExpr is:
         //  * Identifier:
@@ -143,9 +142,10 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
             default -> throw new IllegalStateException("Invalid first child node of a method");
         };
 
-        final StringBuilder code = new StringBuilder();
+        final StringBuilder computation = new StringBuilder();
+        final String code = OptUtils.getTemp() + ollirType;
 
-        final StringBuilder methodInvocationCode = new StringBuilder();
+        final String invocation;
         {
             final List<String> actuals = node.getChildrenStream().skip(1).map(child -> visit(child).getCode()).toList();
 
@@ -154,8 +154,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
             codes.add('"' + methodName + '"');
             codes.addAll(actuals);
 
-            methodInvocationCode.append(String.join(", ", codes));
-            methodInvocationCode.append(R_PAREN);
+            invocation = String.join(", ", codes) + R_PAREN;
         }
 
         // Example code I want to generate:
@@ -166,11 +165,19 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         // First line is computation.
         // Second line is code.
 
-        code.append(methodInvocationCode);
-        code.append(returnType);
+        computation.append(code);                                // tmp0.i32
+        computation.append(SPACE).append(ASSIGN).append(SPACE);  // :=
+        computation.append(ollirType).append(SPACE);             // .i32
+        computation.append(invocation).append(ollirType);        // invokevirtual(this, "constInstr").i32
+        computation.append(END_STMT);
 
-        return new OllirExprResult(code.toString());
-        // return new OllirExprResult(code.toString(), code);
+        if (ollirType.equals(".V")) {
+            // TODO(bartek): This is not the prettiest way to handle this case, but hey, it works.
+            return new OllirExprResult("", invocation + ollirType + END_STMT);
+        }
+
+        return new OllirExprResult(code, computation);
+
     }
 
     private OllirExprResult visitNewObjectExpr(JmmNode node, Void unused) {
