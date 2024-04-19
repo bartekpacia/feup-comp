@@ -181,9 +181,32 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
     }
 
     private OllirExprResult visitNewObjectExpr(JmmNode node, Void unused) {
+        /*
+            tmp2.Simple :=.Simple new(Simple).Simple;
+            invokespecial(tmp2.Simple, "").V;
+            s.Simple :=.Simple tmp2.Simple;
+         */
+
         final String type = node.get("id");
-        final String code = "new" + "(" + type + ")" + "." + type;
-        return new OllirExprResult(code);
+        final String ollirType = "." + type;
+
+        final StringBuilder computation = new StringBuilder();
+        final String code = OptUtils.getTemp() + ollirType;     // tmp2.Simple
+
+        computation.append(code)                                                          // tmp2.Simple
+                .append(SPACE).append(ASSIGN).append(SPACE)                               // :=
+                .append(ollirType).append(" new(").append(type).append(")")               // .Simple new(Simple)
+                .append(ollirType)                                                        // .Simple
+                .append(END_STMT);
+
+        computation
+                .append("invokespecial")
+                .append(L_PAREN).append(code).append(", ").append("\"\"").append(R_PAREN) // (tmp2.Simple, "")
+                .append(ollirType)                                                        // .V
+                .append(END_STMT);
+
+
+        return new OllirExprResult(code, computation);
     }
 
     /**
