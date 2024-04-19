@@ -238,15 +238,16 @@ public class JasminGenerator {
                         .filter(m -> m.getMethodName().equals(methodname))
                         .findFirst().orElseThrow();
 
+                final var caller = (Operand) callInst.getCaller();
+                final int objectrefReg = currentMethod.getVarTable().get(caller.getName()).getVirtualReg();
+                code.append("aload ").append(objectrefReg).append(NL);
+
+                // Push operands onto the stack from the registers.
                 for (final Element element : method.getParams()) {
                     final Operand operand = (Operand) element;
                     final int reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
-                    // final var reg = element.
                     code.append(JasminUtils.load(operand.getType().getTypeOfElement(), reg)).append(NL);
                 }
-
-                // In virtual method call, first local variable is "this". See JVMS section 2.6.1.
-                code.append("aload_0").append(NL);
 
                 code.append("invokevirtual ");
                 code.append(classname).append("/").append(methodname);
