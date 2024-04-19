@@ -44,32 +44,41 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
     }
 
     private OllirExprResult visitBinExpr(JmmNode node, Void unused) {
-        var lhs = visit(node.getChild(0));
-        var rhs = visit(node.getChild(1));
+        /* Let's say we're visiting:
 
-        StringBuilder computation = new StringBuilder();
+            int a;
+            int b;
+            int c;
+            c = a + b;
+        */
+
+        // tmp0.i32 := .i32 a.i32 + .i32 b.i32;
+        // c.int32 := .i32 tmp0.32;
+
+
+        final Type exprType = TypeUtils.getExprType(node, table);
+        final String exprOllirType = OptUtils.toOllirType(exprType);
+
+        final var lhs = visit(node.getChild(0));
+        final var rhs = visit(node.getChild(1));
+
+        final StringBuilder computation = new StringBuilder();
+        final String code = OptUtils.getTemp() + exprOllirType;                       // tmp0.i32
 
         // code to compute the children
         computation.append(lhs.getComputation());
         computation.append(rhs.getComputation());
 
+        computation.append(code);                                                     // tmp0.i32
+        computation.append(SPACE).append(ASSIGN).append(SPACE);                       // :=
+        computation.append(exprOllirType).append(SPACE).append(lhs.getCode());        // .i32 a.i32
+        computation.append(node.get("op")).append(SPACE);                             // +
+        computation.append(exprOllirType).append(SPACE).append(rhs.getCode());        // .i32 b.i32
+        computation.append(END_STMT);
+
         System.out.println("DEBUG ExprGenerator.visitBinExpr:");
         System.out.println("DEBUG   lhs: " + lhs.getComputation());
         System.out.println("DEBUG   rhs: " + rhs.getComputation());
-
-        // code to compute self
-        Type resType = TypeUtils.getExprType(node, table);
-        String resOllirType = OptUtils.toOllirType(resType);
-        String code = OptUtils.getTemp() + resOllirType;
-
-        computation.append(code).append(SPACE)
-                .append(ASSIGN).append(resOllirType).append(SPACE)
-                .append(lhs.getCode()).append(SPACE);
-
-        Type type = TypeUtils.getExprType(node, table);
-        computation.append(node.get("op")).append(OptUtils.toOllirType(type)).append(SPACE)
-                .append(rhs.getCode()).append(END_STMT);
-
         System.out.println("DEBUG   computation:" + computation.toString().replaceAll(NL, ""));
         System.out.println("DEBUG          code:" + code);
 
@@ -148,6 +157,14 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
             methodInvocationCode.append(String.join(", ", codes));
             methodInvocationCode.append(R_PAREN);
         }
+
+        // Example code I want to generate:
+        //
+        // tmp0.i32 = .i32 invokevirtual(this, "constInstr").i32
+        // .i32 tmp0.i32
+        //
+        // First line is computation.
+        // Second line is code.
 
         code.append(methodInvocationCode);
         code.append(returnType);
