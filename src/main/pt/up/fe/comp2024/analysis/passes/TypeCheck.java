@@ -28,19 +28,40 @@ public class TypeCheck extends AnalysisVisitor {
     }
 
     private Void visitVarRefExpr(JmmNode node, SymbolTable table) {
-        if(currentMethodNode.get("isStatic").equals("false")) {
-            return null;
+        final var locals = table.getLocalVariables(currentMethod);
+        final var params = table.getParameters(currentMethod);
+        final var fields = table.getFields();
+
+        for(var local : locals) {
+            if(local.getName().equals(node.get("name"))) {
+                return null;
+            }
         }
 
-        var message = String.format("Variable '%s' does not exist.", node.get("id"));
-        addReport(Report.newError(
-                Stage.SEMANTIC,
-                NodeUtils.getLine(node),
-                NodeUtils.getColumn(node),
-                message,
-                null)
-        );
+        for(var param : params) {
+            if(param.getName().equals(node.get("name"))) {
+                return null;
+            }
+        }
 
+        for (var field : fields) {
+            if (field.getName().equals(node.get("name"))) {
+                if(currentMethodNode.get("isStatic").equals("true")) {
+                    var message = String.format("Variable '%s' does not exist.", node.get("name"));
+                    addReport(Report.newError(
+                            Stage.SEMANTIC,
+                            NodeUtils.getLine(node),
+                            NodeUtils.getColumn(node),
+                            message,
+                            null)
+                    );
+                    return null;
+                }
+                return null;
+            }
+        }
+
+        
         return null;
     }
     private Void visitArithmeticOp(JmmNode node, SymbolTable table) {
