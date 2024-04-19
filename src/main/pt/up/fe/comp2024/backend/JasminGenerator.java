@@ -73,19 +73,22 @@ public class JasminGenerator {
         // generate class name
         final ClassUnit ollirClass = ollirResult.getOllirClass();
         final String className = ollirClass.getClassName();
-        code.append(".class ").append(className).append(NL);
 
+        // TODO(bartek): Use real class access modifier
+        final String accessModifier = "public ";
+
+        code.append(".class ").append(accessModifier).append(className).append(NL);
 
         final String superClass = JasminUtils.toJasminSuperclassType(ollirClass.getSuperClass());
         code.append(".super ").append(superClass).append(NL).append(NL);
 
         // generate a single constructor method
-        String defaultConstructor = ";default constructor" + NL +
+        String defaultConstructor =
                 ".method public <init>()V" + NL +
-                "   aload_0" + NL +
-                "   invokespecial " + superClass + "/" + "<init>()V" + NL +
-                "   return" + NL +
-                ".end method" + NL;
+                        "   aload_0" + NL +
+                        "   invokespecial " + superClass + "/" + "<init>()V" + NL +
+                        "   return" + NL +
+                        ".end method" + NL;
 
         code.append(defaultConstructor);
 
@@ -266,9 +269,11 @@ public class JasminGenerator {
 
                 // We assume that we can call "dup" – or can we?
 
+                // final int reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
+
                 final Operand operand = ((Operand) callInst.getCaller());
                 final String classname = ((ClassType) operand.getType()).getName();
-                final String methodname = ((LiteralElement) callInst.getMethodName()).getLiteral().replace("\"", "");
+                final String methodname = "<init>";
                 final String descriptor = "()V";
 
                 code.append("invokespecial ").append(classname).append("/").append(methodname).append(descriptor).append(NL);
