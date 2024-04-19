@@ -12,8 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static pt.up.fe.comp2024.optimization.OllirTokens.SPACE;
-
 /**
  * Generates Jasmin code from an OllirResult.
  * <p>
@@ -235,9 +233,7 @@ public class JasminGenerator {
         switch (callInst.getInvocationType()) {
             case invokevirtual -> {
                 // In virtual method call, first local variable is "this". See JVMS section 2.6.1.
-                code.append("aload").append(SPACE);
-                Operand operand = (Operand) callInst.getCaller();
-                code.append(currentMethod.getVarTable().get(operand.getName()).getVirtualReg()).append(NL);
+                code.append("aload_0").append(NL);
 
                 code.append("invokevirtual ");
 
@@ -290,7 +286,6 @@ public class JasminGenerator {
 
                 code.append("new ").append(classname).append(NL);
                 code.append("dup").append(NL);
-                code.append("invokespecial ").append(classname).append("/<init>()V").append(NL);
             }
             case arraylength -> throw new NotImplementedException("arraylength is not yet implemented");
             case ldc -> throw new NotImplementedException("Not suported by Java--");
