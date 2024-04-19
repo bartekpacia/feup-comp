@@ -77,10 +77,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         code.append(END_STMT);
 
-        System.out.println("DEBUG Generator.visitAssignStmt:");
-        System.out.println("DEBUG          code (below): ");
-        System.out.println(code);
-
         return code.toString();
     }
 

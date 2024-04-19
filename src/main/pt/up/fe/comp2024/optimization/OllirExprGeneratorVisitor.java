@@ -76,12 +76,6 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         computation.append(exprOllirType).append(SPACE).append(rhs.getCode());        // .i32 b.i32
         computation.append(END_STMT);
 
-        System.out.println("DEBUG ExprGenerator.visitBinExpr:");
-        System.out.println("DEBUG   lhs: " + lhs.getComputation());
-        System.out.println("DEBUG   rhs: " + rhs.getComputation());
-        System.out.println("DEBUG   computation:" + computation.toString().replaceAll(NL, ""));
-        System.out.println("DEBUG          code:" + code);
-
         return new OllirExprResult(code, computation);
     }
 
