@@ -28,8 +28,6 @@ public class UndeclaredVariable extends AnalysisVisitor {
     }
 
     private Void visitIDUseExpr(JmmNode node, SymbolTable table) {
-        System.out.println(node);
-        System.out.println(node.get("name"));
         for (var method : table.getMethods()) {
             if (method.equals(node.get("name"))) {
                 return null;

@@ -91,8 +91,6 @@ public class TypeCheck extends AnalysisVisitor {
 
         var rightType = TypeUtils.getExprType(rightNode,table);
         var leftType = TypeUtils.getVarExprAssignType(node, table);
-        System.out.println(rightType);
-        System.out.println(leftType);
         if (rightType.equals(leftType)) {
             return null;
         }
