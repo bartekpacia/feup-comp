@@ -47,7 +47,7 @@ public class TypeCheck extends AnalysisVisitor {
         final Type leftType = TypeUtils.getExprType(node.getChild(0), table);
         final Type rightType = TypeUtils.getExprType(node.getChild(1), table);
 
-        if (leftType != null && rightType != null && leftType.getName().equals("int") && rightType.getName().equals("int")) {
+        if (leftType != null && rightType != null && (leftType.getName().equals("int") || leftType.getName().equals("int[]")) && (rightType.getName().equals("int") || rightType.getName().equals("int[]"))) {
             return null;
         }
 

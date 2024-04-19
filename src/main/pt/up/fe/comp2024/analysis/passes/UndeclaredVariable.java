@@ -68,8 +68,13 @@ public class UndeclaredVariable extends AnalysisVisitor {
         {
             final Type firstOperandType = TypeUtils.getExprType(firstOperand, table);
             final Type secondOperandType = TypeUtils.getExprType(secondOperand, table);
+            System.out.println(op);
+            System.out.println(op.getChild(0));
+            System.out.println(op.getChild(1));
+            System.out.println(firstOperandType.getName());
+            System.out.println(secondOperandType.getName());
             if (firstOperandType != null && secondOperandType != null) {
-                final boolean firstOperandTypeOk = firstOperandType.getName().equals("int");
+                final boolean firstOperandTypeOk = firstOperandType.getName().equals("int") || firstOperandType.getName().equals("int[]");
                 final boolean secondOperandTypeOk = secondOperandType.getName().equals("int");
                 final boolean sameOperandTypes = firstOperandTypeOk && secondOperandTypeOk;
                 if (sameOperandTypes) {
@@ -79,7 +84,7 @@ public class UndeclaredVariable extends AnalysisVisitor {
         }
 
         System.out.println("burro");
-        var message = String.format("Variable '%s' does not exist - undv_opvisit", op.getChild(0));
+        var message = String.format("Variable '%s' does not exist - undv_opvisit", op);
         addReport(Report.newError(
                 Stage.SEMANTIC,
                 NodeUtils.getLine(op),

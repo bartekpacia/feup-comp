@@ -23,10 +23,9 @@ public class ArrayCheck extends AnalysisVisitor {
     private Void visitArrIdx(JmmNode node, SymbolTable table) {
         var leftType = TypeUtils.getExprType(node.getChild(0),table);
         var rightType = TypeUtils.getExprType(node.getChild(1),table);
-        if(rightType.getName().equals("int") || rightType.getName().equals("int[]")) {
-            if(leftType.isArray() || leftType.getName().equals("int...")) {
-                return null;
-            }
+
+        if((leftType.isArray() || leftType.getName().equals("int...")) && rightType.getName().equals("int")) {
+            return null;
         }
 
         var message = String.format("Variable '%s' does not exist - arr_arridxvisit", node);
