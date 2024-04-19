@@ -64,7 +64,6 @@ public class UndeclaredVariable extends AnalysisVisitor {
     private Void visitOp(JmmNode op, SymbolTable table) {
         final JmmNode firstOperand = op.getChild(0);
         final JmmNode secondOperand = op.getChild(1);
-
         // Check if operand types are the same
         {
             final Type firstOperandType = TypeUtils.getExprType(firstOperand, table);
@@ -79,76 +78,7 @@ public class UndeclaredVariable extends AnalysisVisitor {
             }
         }
 
-        if (op.getChild(0).getKind().equals("Identifier") && op.getChild(1).getKind().equals("IntegerLiteral")) {
-            SpecsCheck.checkNotNull(currentMethod, () -> "Expected current method to be set");
-
-            // Var is a field, return
-            if (table.getFields().stream()
-                    .anyMatch(param -> param.getName().equals(op.getChild(0).get("id")))){
-                return null;
-            }
-
-            // Var is a parameter, return
-            if (table.getParameters(currentMethod).stream()
-                    .anyMatch(param -> param.getName().equals(op.getChild(0).get("id")))) {
-                return null;
-            }
-
-            // Var is a declared variable, return
-            if ((table.getLocalVariables(currentMethod).stream()
-                    .anyMatch(varDecl -> varDecl.getName().equals(op.getChild(0).get("id")))))  {
-                return null;
-            }
-        }
-
-        if (op.getChild(0).getKind().equals("IntegerLiteral") && op.getChild(1).getKind().equals("Identifier")) {
-            // Var is a field, return
-            if (table.getFields().stream()
-                    .anyMatch(param -> param.getName().equals(op.getChild(1).get("id")))){
-                return null;
-            }
-
-            // Var is a parameter, return
-            if (table.getParameters(currentMethod).stream()
-                    .anyMatch(param -> param.getName().equals(op.getChild(1).get("id")))) {
-                return null;
-            }
-
-            // Var is a declared variable, return
-            if ((table.getLocalVariables(currentMethod).stream()
-                    .anyMatch(varDecl -> varDecl.getName().equals(op.getChild(1).get("id")))))  {
-                return null;
-            }
-        }
-
-        if (op.getChild(0).getKind().equals("Identifier") && op.getChild(1).getKind().equals("Identifier")) {
-            SpecsCheck.checkNotNull(currentMethod, () -> "Expected current method to be set");
-
-            // Var is a field, return
-            if ((table.getFields().stream()
-                    .anyMatch(param -> param.getName().equals(op.getChild(0).get("id")))) &&
-                    (table.getFields().stream()
-                    .anyMatch(param -> param.getName().equals(op.getChild(1).get("id"))))){
-                return null;
-            }
-
-            // Var is a parameter, return
-            if ((table.getParameters(currentMethod).stream()
-                    .anyMatch(param -> param.getName().equals(op.getChild(0).get("id")))) &&
-                    (table.getParameters(currentMethod).stream()
-                    .anyMatch(param -> param.getName().equals(op.getChild(1).get("id"))))) {
-                return null;
-            }
-
-            // Var is a declared variable, return
-            if ((table.getLocalVariables(currentMethod).stream()
-                    .anyMatch(varDecl -> varDecl.getName().equals(op.getChild(0).get("id")))) &&
-                    (table.getLocalVariables(currentMethod).stream()
-                    .anyMatch(varDecl -> varDecl.getName().equals(op.getChild(1).get("id"))))) {
-                return null;
-            }
-        }
-
+        System.out.println("burro");
         var message = String.format("Variable '%s' does not exist - undv_opvisit", op.getChild(0));
         addReport(Report.newError(
                 Stage.SEMANTIC,

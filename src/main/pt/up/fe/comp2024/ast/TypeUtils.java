@@ -18,6 +18,7 @@ public class TypeUtils {
     private static final String VARARG_TYPE_NAME = "int...";
     private static final String BOOL_TYPE_NAME = "boolean";
     private static final String VOID_TYPE_NAME = "void";
+    private static final String ARR_INDEX_NAME = "int[]";
 
     public static String getIntTypeName() {
         return INT_TYPE_NAME;
@@ -40,6 +41,7 @@ public class TypeUtils {
             case NEW_CLASS -> new Type(expr.get("id"),false);
             case NEW_INT_ARR -> new Type(INT_TYPE_NAME, true);
             case ARR_REF_EXPR -> new Type(INT_TYPE_NAME, true);
+            case ARRAY_INDEX -> new Type(ARR_INDEX_NAME, true);
             case ID_USE_EXPR -> {
                 final String name = expr.get("name");
 
