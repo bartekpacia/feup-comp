@@ -265,10 +265,7 @@ public class JasminGenerator {
             case invokespecial -> {
                 // invokespecial was named invokenonvirtual in the past.
                 // The difference to invokevirtual is that invokespecial is resolved at compile time.
-
                 // The first argument to invokespecial is an objectref.
-
-                // We assume that we can call "dup" – or can we?
 
                 final Operand operand = ((Operand) callInst.getCaller());
                 final String classname = ((ClassType) operand.getType()).getName();
@@ -285,7 +282,14 @@ public class JasminGenerator {
                 // final String classname = ((ClassType) callInst.getCaller().getType()).getName();
                 final String classname = ((Operand) callInst.getCaller()).getName();
                 final String methodname = ((LiteralElement) callInst.getMethodName()).getLiteral().replace("\"", "");
-                final String descriptor = "()V";
+                final String descriptor = "(" + JasminUtils.argumentsToDescriptor(callInst.getArguments()) + ")V";
+
+                for (final Element element : callInst.getArguments()) {
+                    final Operand operand = (Operand) element;
+                    final int reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
+                    code.append(JasminUtils.load(operand.getType().getTypeOfElement(), reg)).append(NL);
+                }
+
                 code.append("invokestatic ").append(classname).append("/").append(methodname).append(descriptor).append(NL);
             }
             case NEW -> {
