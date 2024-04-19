@@ -201,6 +201,8 @@ public class JasminGenerator {
         final String op = switch (binaryOp.getOperation().getOpType()) {
             case ADD -> "iadd";
             case MUL -> "imul";
+            case DIV -> "idiv"; //TODO(goncalo)
+            case SUB -> "isub";//TODO(goncalo)
             default -> throw new NotImplementedException(binaryOp.getOperation().getOpType());
         };
 
