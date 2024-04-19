@@ -167,17 +167,10 @@ public class JasminGenerator {
             throw new NotImplementedException(lhs.getClass());
         }
 
-        // get register
         final int reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
+        final ElementType elementType = lhs.getType().getTypeOfElement();
 
-        final var elementType = lhs.getType().getTypeOfElement();
-        final String storeOpcode = switch (elementType) {
-            case INT32, BOOLEAN -> "istore"; // There is no separate boolean type on the JVM.
-            case OBJECTREF, STRING -> "astore";
-            case THIS -> "astore_0"; // bartek: this seems invalid. Assignment to "this" is impossible.
-            case ARRAYREF, CLASS, VOID -> throw new NotImplementedException(elementType);
-        };
-        code.append(storeOpcode).append(" ").append(reg).append(NL);
+        code.append(JasminUtils.store(elementType, reg)).append(NL);
 
         return code.toString();
     }
@@ -193,7 +186,8 @@ public class JasminGenerator {
     private String generateOperand(Operand operand) {
         // get register
         final int reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
-        return "iload " + reg + NL;
+        final ElementType elementType = operand.getType().getTypeOfElement();
+        return JasminUtils.load(elementType, reg) + NL;
     }
 
     private String generateBinaryOp(BinaryOpInstruction binaryOp) {
@@ -235,14 +229,8 @@ public class JasminGenerator {
 
         switch (callInst.getInvocationType()) {
             case invokevirtual -> {
-                // In virtual method call, first local variable is "this". See JVMS section 2.6.1.
-                code.append("aload_0").append(NL);
-
-                code.append("invokevirtual ");
-
                 final String classname = ((ClassType) callInst.getCaller().getType()).getName();
                 final String methodname = ((LiteralElement) callInst.getMethodName()).getLiteral().replace("\"", "");
-                code.append(classname).append("/").append(methodname);
 
                 // Find matching method by name. Java-- does not support method overloading.
                 // TODO(bartek): Support imported and inherited methods (i.e. methods not present in ClassUnit)
@@ -250,6 +238,18 @@ public class JasminGenerator {
                         .filter(m -> m.getMethodName().equals(methodname))
                         .findFirst().orElseThrow();
 
+                for (final Element element : method.getParams()) {
+                    final Operand operand = (Operand) element;
+                    final int reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
+                    // final var reg = element.
+                    code.append(JasminUtils.load(operand.getType().getTypeOfElement(), reg)).append(NL);
+                }
+
+                // In virtual method call, first local variable is "this". See JVMS section 2.6.1.
+                code.append("aload_0").append(NL);
+
+                code.append("invokevirtual ");
+                code.append(classname).append("/").append(methodname);
                 code.append("(");
                 code.append(method.getParams().stream()
                         .map(p -> JasminUtils.toJasminType(p.getType()))
@@ -269,14 +269,15 @@ public class JasminGenerator {
 
                 // We assume that we can call "dup" – or can we?
 
-                // final int reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
-
                 final Operand operand = ((Operand) callInst.getCaller());
                 final String classname = ((ClassType) operand.getType()).getName();
                 final String methodname = "<init>";
                 final String descriptor = "()V";
 
+                final int reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
+                code.append("aload ").append(reg).append(NL);
                 code.append("invokespecial ").append(classname).append("/").append(methodname).append(descriptor).append(NL);
+                code.append("pop ").append(NL); // Dismiss the void result of invokespecial
 
             }
             case invokestatic -> {
