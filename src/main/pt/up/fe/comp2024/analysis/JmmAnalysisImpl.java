@@ -14,13 +14,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class JmmAnalysisImpl implements JmmAnalysis {
-
-
     private final List<AnalysisPass> analysisPasses;
 
     public JmmAnalysisImpl() {
-        this.analysisPasses = List.of(new UndeclaredVariable(), new TypeCheck(), new ArrayCheck(),new ConditionalCheck(),
-                new ImportCheck(), new VarArgCheck());
+        this.analysisPasses = List.of(
+                new UndeclaredVariable(),
+                new TypeCheck(),
+                new ArrayCheck(),
+                new ConditionalCheck(),
+                new ImportCheck(),
+                new VarArgCheck()
+        );
     }
 
     @Override
