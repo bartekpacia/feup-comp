@@ -1,10 +1,33 @@
 package pt.up.fe.comp2024.backend;
 
 import org.specs.comp.ollir.ArrayType;
-import pt.up.fe.specs.util.exceptions.NotImplementedException;
+import org.specs.comp.ollir.ElementType;
 import org.specs.comp.ollir.Type;
+import pt.up.fe.specs.util.exceptions.NotImplementedException;
 
 public class JasminUtils {
+    public static String store(ElementType type, int reg) {
+        final String bytecode = switch (type) {
+            case INT32, BOOLEAN -> "istore"; // There is no separate boolean type on the JVM.
+            case OBJECTREF, STRING -> "astore";
+            case THIS -> "astore_0"; // bartek: this seems invalid. Assignment to "this" is impossible.
+            case ARRAYREF, CLASS, VOID -> throw new NotImplementedException(type);
+        };
+
+        return bytecode + " " + reg;
+    }
+
+    public static String load(ElementType type, int reg) {
+        final String bytecode = switch (type) {
+            case INT32, BOOLEAN -> "iload"; // There is no separate boolean type on the JVM.
+            case OBJECTREF, STRING -> "aload";
+            case THIS -> "aload_0";
+            case ARRAYREF, CLASS, VOID -> throw new NotImplementedException(type);
+        };
+
+        return bytecode + " " + reg;
+    }
+
     /**
      * Converts OLLIR type into Jasmin type.
      */
