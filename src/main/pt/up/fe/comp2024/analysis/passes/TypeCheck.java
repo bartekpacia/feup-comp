@@ -1,6 +1,7 @@
 package pt.up.fe.comp2024.analysis.passes;
 
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
+import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.Stage;
@@ -43,10 +44,10 @@ public class TypeCheck extends AnalysisVisitor {
         return null;
     }
     private Void visitArithmeticOp(JmmNode node, SymbolTable table) {
-        var leftType = TypeUtils.getExprType(node.getChild(0),table);
-        var rightType = TypeUtils.getExprType(node.getChild(1),table);
+        final Type leftType = TypeUtils.getExprType(node.getChild(0), table);
+        final Type rightType = TypeUtils.getExprType(node.getChild(1), table);
 
-        if (leftType.getName().equals("int") && rightType.getName().equals("int")) {
+        if (leftType != null && rightType != null && leftType.getName().equals("int") && rightType.getName().equals("int")) {
             return null;
         }
 

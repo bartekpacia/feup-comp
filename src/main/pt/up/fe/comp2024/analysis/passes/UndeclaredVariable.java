@@ -1,6 +1,7 @@
 package pt.up.fe.comp2024.analysis.passes;
 
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
+import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.Stage;
@@ -61,9 +62,21 @@ public class UndeclaredVariable extends AnalysisVisitor {
     }
 
     private Void visitOp(JmmNode op, SymbolTable table) {
+        final JmmNode firstOperand = op.getChild(0);
+        final JmmNode secondOperand = op.getChild(1);
 
-        if (TypeUtils.getExprType(op.getChild(0),table).getName().equals("int") && TypeUtils.getExprType(op.getChild(1),table).getName().equals("int")) {
-            return null;
+        // Check if operand types are the same
+        {
+            final Type firstOperandType = TypeUtils.getExprType(firstOperand, table);
+            final Type secondOperandType = TypeUtils.getExprType(secondOperand, table);
+            if (firstOperandType != null && secondOperandType != null) {
+                final boolean firstOperandTypeOk = firstOperandType.getName().equals("int");
+                final boolean secondOperandTypeOk = secondOperandType.getName().equals("int");
+                final boolean sameOperandTypes = firstOperandTypeOk && secondOperandTypeOk;
+                if (sameOperandTypes) {
+                    return null;
+                }
+            }
         }
 
         if (op.getChild(0).getKind().equals("Identifier") && op.getChild(1).getKind().equals("IntegerLiteral")) {
