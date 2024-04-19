@@ -28,40 +28,17 @@ public class TypeCheck extends AnalysisVisitor {
     }
 
     private Void visitVarRefExpr(JmmNode node, SymbolTable table) {
-        final var locals = table.getLocalVariables(currentMethod);
-        final var params = table.getParameters(currentMethod);
-        final var fields = table.getFields();
-
-        for(var local : locals) {
-            if(local.getName().equals(node.get("name"))) {
-                return null;
-            }
+        if(TypeUtils.isField(node, table, currentMethod) && currentMethodNode.get("isStatic").equals("true")) {
+            var message = String.format("Variable '%s' does not exist.", node.get("name"));
+            addReport(Report.newError(
+                    Stage.SEMANTIC,
+                    NodeUtils.getLine(node),
+                    NodeUtils.getColumn(node),
+                    message,
+                    null)
+            );
+            return null;
         }
-
-        for(var param : params) {
-            if(param.getName().equals(node.get("name"))) {
-                return null;
-            }
-        }
-
-        for (var field : fields) {
-            if (field.getName().equals(node.get("name"))) {
-                if(currentMethodNode.get("isStatic").equals("true")) {
-                    var message = String.format("Variable '%s' does not exist.", node.get("name"));
-                    addReport(Report.newError(
-                            Stage.SEMANTIC,
-                            NodeUtils.getLine(node),
-                            NodeUtils.getColumn(node),
-                            message,
-                            null)
-                    );
-                    return null;
-                }
-                return null;
-            }
-        }
-
-        
         return null;
     }
     private Void visitArithmeticOp(JmmNode node, SymbolTable table) {
@@ -113,11 +90,27 @@ public class TypeCheck extends AnalysisVisitor {
 
         var rightType = TypeUtils.getExprType(rightNode,table);
         var leftType = TypeUtils.getVarExprAssignType(node, table);
+
+        if(TypeUtils.isField(node, table, currentMethod) && currentMethodNode.get("isStatic").equals("true")) {
+            var message = String.format("Variable '%s' does not exist.", node.get("id"));
+            addReport(Report.newError(
+                    Stage.SEMANTIC,
+                    NodeUtils.getLine(node),
+                    NodeUtils.getColumn(node),
+                    message,
+                    null)
+            );
+            return null;
+        }
+
         if (rightType.equals(leftType)) {
             return null;
         }
         final var imports = table.getImports();
         final var superName = table.getSuper();
+
+
+
 
         if((imports.contains(leftType.getName()) && imports.contains(rightType.getName())) || (imports.contains(superName))) {
             return null;

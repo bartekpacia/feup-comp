@@ -4,13 +4,14 @@ import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
+import pt.up.fe.comp.jmm.report.Report;
+import pt.up.fe.comp.jmm.report.Stage;
 import pt.up.fe.comp2024.optimization.OptUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static pt.up.fe.comp2024.ast.Kind.ASSIGN_STMT;
-import static pt.up.fe.comp2024.ast.Kind.METHOD_DECL;
+import static pt.up.fe.comp2024.ast.Kind.*;
 
 public class TypeUtils {
 
@@ -220,5 +221,34 @@ public class TypeUtils {
     public static boolean areTypesAssignable(Type sourceType, Type destinationType) {
 
         return sourceType.equals(destinationType);
+    }
+
+    public static boolean isField(JmmNode node, SymbolTable table, String currentMethod) {
+        final var locals = table.getLocalVariables(currentMethod);
+        final var params = table.getParameters(currentMethod);
+        final var fields = table.getFields();
+        String nodeAnnotation = node.isInstance(VAR_REF_EXPR) ? "name" : "id";
+
+        System.out.println(node);
+        System.out.println(nodeAnnotation);
+
+        for(var local : locals) {
+            if(local.getName().equals(node.get(nodeAnnotation))) {
+                return false;
+            }
+        }
+
+        for(var param : params) {
+            if(param.getName().equals(node.get(nodeAnnotation))) {
+                return false;
+            }
+        }
+
+        for (var field : fields) {
+            if (field.getName().equals(node.get(nodeAnnotation))) {
+                return true;
+            }
+        }
+        return false;
     }
 }
