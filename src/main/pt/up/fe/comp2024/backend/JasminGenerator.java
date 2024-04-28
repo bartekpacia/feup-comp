@@ -287,9 +287,14 @@ public class JasminGenerator {
                 final String descriptor = "(" + JasminUtils.argumentsToDescriptor(callInst.getArguments()) + ")V";
 
                 for (final Element element : callInst.getArguments()) {
-                    final Operand operand = (Operand) element;
-                    final int reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
-                    code.append(JasminUtils.load(operand.getType().getTypeOfElement(), reg)).append(NL);
+                    if (element.isLiteral()) {
+                        final var literal = ((LiteralElement) element).getLiteral();
+                        code.append("ldc ").append(literal).append(NL);
+                    } else {
+                        final Operand operand = (Operand) element;
+                        final int reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
+                        code.append(JasminUtils.load(operand.getType().getTypeOfElement(), reg)).append(NL);
+                    }
                 }
 
                 code.append("invokestatic ").append(classname).append("/").append(methodname).append(descriptor).append(NL);
