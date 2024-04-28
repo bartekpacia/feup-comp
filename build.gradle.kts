@@ -1,8 +1,8 @@
 plugins {
+    antlr
     application
     distribution
     java
-    antlr
 }
 
 java {
@@ -15,9 +15,9 @@ repositories {
 }
 
 dependencies {
+    antlr("org.antlr:antlr4:4.5.3")
     implementation("junit:junit:4.11")
     implementation("com.google.code.gson:gson:2.10")
-    antlr("org.antlr:antlr4:4.5.3")
     implementation("org.fusesource.jansi:jansi:2.4.0")
 }
 
@@ -56,6 +56,10 @@ dependencies {
 tasks {
     installDist {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    }
+
+    withType<JavaCompile> {
+        options.compilerArgs.addAll(listOf("-Xlint:deprecation"))
     }
 
     withType<Tar> {

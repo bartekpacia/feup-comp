@@ -36,10 +36,10 @@ public class TypeUtils {
         return switch (kind) {
             case BINARY_EXPR -> getBinExprType(expr);
             case VAR_REF_EXPR -> getVarExprType(expr, table);
-            case BOOL -> new Type(BOOL_TYPE_NAME,false);
+            case BOOL -> new Type(BOOL_TYPE_NAME, false);
             case INTEGER_LITERAL -> new Type(INT_TYPE_NAME, false);
             case VARARG -> new Type(VARARG_TYPE_NAME, false);
-            case NEW_CLASS -> new Type(expr.get("id"),false);
+            case NEW_CLASS -> new Type(expr.get("id"), false);
             case NEW_INT_ARR -> new Type(INT_TYPE_NAME, true);
             case ARR_REF_EXPR -> new Type(INT_TYPE_NAME, true);
             case ARRAY_INDEX -> new Type(ARR_INDEX_NAME, true);
@@ -113,6 +113,15 @@ public class TypeUtils {
                     }
                 }
 
+                final List<Symbol> fields = new ArrayList<>(table.getFields());
+                for (final Symbol field : fields) {
+                    if (field.getName().equals(ident)) {
+                        localType = field.getType();
+                        break;
+                    }
+                }
+
+
                 // Search for identifier in file's imports
                 final List<String> imports = new ArrayList<>(table.getImports());
                 for (final String imp : imports) {
@@ -142,7 +151,8 @@ public class TypeUtils {
         String operator = binaryExpr.get("op");
 
         return switch (operator) {
-            case "+", "*", "-", "/" -> new Type(INT_TYPE_NAME, false); //todo(goncalo): added - and / ask where tf < and > r and how this func is used
+            case "+", "*", "-", "/" ->
+                    new Type(INT_TYPE_NAME, false); //todo(goncalo): added - and / ask where tf < and > r and how this func is used
             default ->
                     throw new RuntimeException("Unknown operator '" + operator + "' of expression '" + binaryExpr + "'");
         };
@@ -213,6 +223,7 @@ public class TypeUtils {
 
         throw new RuntimeException("Variable " + leftSymbol + "not found.");
     }
+
     /**
      * @param sourceType
      * @param destinationType
@@ -227,28 +238,26 @@ public class TypeUtils {
         final var locals = table.getLocalVariables(currentMethod);
         final var params = table.getParameters(currentMethod);
         final var fields = table.getFields();
-        String nodeAnnotation = node.isInstance(VAR_REF_EXPR) ? "name" : "id";
+        final var nodeAnnotation = node.isInstance(VAR_REF_EXPR) ? "name" : "id";
 
-        System.out.println(node);
-        System.out.println(nodeAnnotation);
-
-        for(var local : locals) {
-            if(local.getName().equals(node.get(nodeAnnotation))) {
+        for (final var local : locals) {
+            if (local.getName().equals(node.get(nodeAnnotation))) {
                 return false;
             }
         }
 
-        for(var param : params) {
-            if(param.getName().equals(node.get(nodeAnnotation))) {
+        for (final var param : params) {
+            if (param.getName().equals(node.get(nodeAnnotation))) {
                 return false;
             }
         }
 
-        for (var field : fields) {
+        for (final var field : fields) {
             if (field.getName().equals(node.get(nodeAnnotation))) {
                 return true;
             }
         }
+
         return false;
     }
 }

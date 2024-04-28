@@ -27,7 +27,7 @@ IMPORT : 'import';
 EXTENDS : 'extends';
 CLASS : 'class' ;
 INT : 'int' ;
-VARARG: 'int...';
+VARARG: 'int' [ \t]* '...'; // FIXME: Ignore whitespaces when creating the actual type name in AST
 STRING : 'String';
 BOOL : 'boolean';
 TRUE : 'true';
