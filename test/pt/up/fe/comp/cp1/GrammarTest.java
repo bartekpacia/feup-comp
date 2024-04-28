@@ -16,12 +16,20 @@ package pt.up.fe.comp.cp1;
 import org.junit.Test;
 import pt.up.fe.comp.TestUtils;
 
+import pt.up.fe.specs.util.properties.SpecsProperties;
+import java.io.File;
+
+
 public class GrammarTest {
-    private static final String IMPORT = "importDecl";
-    private static final String MAIN_METHOD = "methodDecl";
-    private static final String INSTANCE_METHOD = "methodDecl";
-    private static final String STATEMENT = "stmt";
-    private static final String EXPRESSION = "expr";
+
+	private static final SpecsProperties props = SpecsProperties.newInstance(new File("grammar.properties"));
+
+
+    private static final String IMPORT = props.get(() -> "Import");
+    private static final String MAIN_METHOD = props.get(() -> "MainMethod");
+    private static final String INSTANCE_METHOD = props.get(() -> "InstanceMethod");
+    private static final String STATEMENT = props.get(() -> "Statement");
+    private static final String EXPRESSION = props.get(() -> "Expression");
 
     @Test
     public void testImportSingle() {
