@@ -92,13 +92,13 @@ public class UndeclaredVariable extends AnalysisVisitor {
                 message,
                 null)
         );
-
         return null;
     }
     private Void visitReturnStmt(JmmNode stmt, SymbolTable table) {
         JmmNode returnVar = stmt.getChild(0);
-
-        if (returnVar.getKind().equals("IntegerLiteral")) {
+        if(returnVar.getKind().equals("Bool")) {
+            return null;
+        } else if (returnVar.getKind().equals("IntegerLiteral")) {
             return null;
         } else if (returnVar.getKind().equals("Identifier")) {
                 SpecsCheck.checkNotNull(currentMethod, () -> "Expected current method to be set");

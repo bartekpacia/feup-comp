@@ -20,7 +20,6 @@ public class VarArgCheck extends AnalysisVisitor {
         final var lastIdx = params.size() - 1;
         for (var param : params) {
             var paramType = param.getType().getName();
-            System.out.println("EHHEHEEH paramType is: " + paramType);
             if ((params.get(lastIdx) != param) && (paramType.equals("int..."))) {
                 var message = String.format("Variable '%s' does not exist - vararg_methodvisit", node);
                 addReport(Report.newError(

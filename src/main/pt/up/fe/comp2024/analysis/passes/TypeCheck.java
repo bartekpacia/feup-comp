@@ -136,11 +136,13 @@ public class TypeCheck extends AnalysisVisitor {
     private Void visitReturnStmt(JmmNode stmt, SymbolTable table) {
         JmmNode returnVar = stmt.getChild(0);
         final boolean isIntegerLiteral = returnVar.getKind().equals("IntegerLiteral");
+        final boolean isBooleanLiteral = returnVar.getKind().equals("Bool");
         final boolean isIdentifier = returnVar.getKind().equals("Identifier");
         final boolean isArrayIndex = returnVar.getKind().equals("ArrayIndex");
         final boolean isReturnTypeInt = table.getReturnType(currentMethod).getName().equals("int");
-        final boolean isReturnTypeBool = table.getReturnType(currentMethod).getName().equals("bool");
-        if ((isIntegerLiteral && isReturnTypeInt) || (isIntegerLiteral && isReturnTypeBool)) {
+        final boolean isReturnTypeBool = table.getReturnType(currentMethod).getName().equals("boolean");
+
+        if ((isIntegerLiteral && isReturnTypeInt) || (isBooleanLiteral && isReturnTypeBool)) {
             return null;
         } else if (isIdentifier && varIsReturnType(returnVar, table)) {
             return null;
