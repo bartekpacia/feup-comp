@@ -101,7 +101,8 @@ public class TypeCheck extends AnalysisVisitor {
 
         var rightType = TypeUtils.getExprType(rightNode,table);
         var leftType = TypeUtils.getVarExprAssignType(node, table);
-
+        System.out.println("Right type: " + rightType);
+        System.out.println("Left type: " + leftType);
         if(TypeUtils.isField(node, table, currentMethod) && currentMethodNode.get("isStatic").equals("true")) {
             var message = String.format("Variable '%s' does not exist.", node.get("id"));
             addReport(Report.newError(
@@ -117,15 +118,18 @@ public class TypeCheck extends AnalysisVisitor {
         if (rightType.equals(leftType)) {
             return null;
         }
+
+        if(rightType.getName().equals("int") && leftType.getName().equals("int[]") || rightType.getName().equals("int[]") && leftType.getName().equals("int")) {
+            return null;
+        }
+
         final var imports = table.getImports();
         final var superName = table.getSuper();
-
-
-
 
         if((imports.contains(leftType.getName()) && imports.contains(rightType.getName())) || (imports.contains(superName))) {
             return null;
         }
+
         var message = String.format("Variable '%s' does not exist - type_assignopvisit", node.getChild(0));
         addReport(Report.newError(Stage.SEMANTIC, NodeUtils.getLine(node), NodeUtils.getColumn(node), message, null)
         );
