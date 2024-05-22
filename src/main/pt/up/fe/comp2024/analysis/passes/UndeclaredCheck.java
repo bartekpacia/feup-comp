@@ -35,19 +35,10 @@ public class UndeclaredCheck extends AnalysisVisitor {
     }
 
     private Void visitImportDecl(JmmNode node, SymbolTable table) {
-        String[] separeted = node.get("name").replace("[", "").replace("]", "").split(",");
-        StringBuilder result = new StringBuilder();
-        for (int i = 0; i < separeted.length; i++) {
-            result.append(separeted[i].trim());
-            if (i < separeted.length - 1) {
-                result.append(".");
-            }
-        }
+
         if(table.getImports().isEmpty()) return null;
 
-        if(Collections.frequency(table.getImports(),result) == 1) return null;
-
-        if(Collections.frequency(table.getImports(), node.get("name")) == 1) return null;
+        if(Collections.frequency(table.getImports(),node.get("ID")) == 1) return null;
 
         var message = String.format("Import '%s' does not exist or is duplicated - undv_dupimportvisit", node);
         addReport(Report.newError(
