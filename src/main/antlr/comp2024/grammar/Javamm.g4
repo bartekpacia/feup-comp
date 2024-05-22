@@ -110,6 +110,7 @@ expr
     : LPAREN expr RPAREN #ParenExpr
     | expr LSQPAREN expr RSQPAREN #ArrRefExpr
     | RSQPAREN (expr (COL expr)*)? LSQPAREN #ArrRefExpr
+    | expr '[' expr ']' #ArrayIndex
     | expr DOT 'length' #LenCheckExpr
     | expr DOT name=ID LPAREN (expr (COL expr)*)? RPAREN #IdUseExpr
     | op=NOT expr #NotOp
@@ -118,7 +119,6 @@ expr
     | expr (op='<'| op='>' ) expr #BinaryExpr
     | expr op = '&&' expr #BoolOp
     | expr op =  '||' expr #BoolOp
-    | expr '[' expr ']' #ArrayIndex
     | value=INTEGER #IntegerLiteral
     | id = ID #Identifier
     | name=THIS #VarRefExpr
