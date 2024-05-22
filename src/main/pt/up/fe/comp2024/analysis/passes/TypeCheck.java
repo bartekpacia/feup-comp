@@ -73,14 +73,10 @@ public class TypeCheck extends AnalysisVisitor {
     }
 
     private Void visitCondOp(JmmNode node, SymbolTable table) {
-        System.out.println(node.getKind());
         var leftType = TypeUtils.getExprType(node.getChild(0),table);
-        System.out.println("lt: " + leftType);
         if(!node.getKind().equals("NOT_OP")) {
             var rightType = TypeUtils.getExprType(node.getChild(1),table);
-            System.out.println("rt: " + rightType);
             if (leftType.getName().equals("boolean") && rightType.getName().equals("boolean")) {
-                System.out.println("ok");
                 return null;
             }
         }

@@ -32,14 +32,8 @@ public class ImportCheck extends AnalysisVisitor {
     }
 
     private Void dealWithImportedAssignment(JmmNode node, SymbolTable table) {
-        //System.out.println("---------------------------------------");
-        //System.out.println(node.get("id"));
-
-        //System.out.println("VARIAVEIS DECLARADAS");
         for(var local : table.getLocalVariables(currentMethod)){
-            //System.out.println(x.getName());
             if(node.get("id").equals(local.getName())){
-                //System.out.println("A VARIAVEL EXISTE NA FUNCAO");
                 return null;
             }
         }
