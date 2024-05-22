@@ -23,7 +23,6 @@ public class ConditionalCheck extends AnalysisVisitor {
     }
 
     private Void dealWithMethod(JmmNode node, SymbolTable table) {
-
         currentMethod = node.get("name");
         return null;
     }
