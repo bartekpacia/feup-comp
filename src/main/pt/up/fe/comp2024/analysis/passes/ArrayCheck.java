@@ -23,17 +23,27 @@ public class ArrayCheck extends AnalysisVisitor {
     private Void visitArrIdx(JmmNode node, SymbolTable table) {
         var leftType = TypeUtils.getExprType(node.getChild(0),table);
         System.out.println("here");
-        System.out.println(leftType);
         var rightType = TypeUtils.getExprType(node.getChild(1),table);
+        System.out.println("left: " + node.getChild(0));
+        System.out.println(leftType);
+        System.out.println("right: " + node.getChild(1));
         System.out.println(rightType);
-        System.out.println(leftType.isArray());
-        System.out.println(leftType.getName().equals("int..."));
-        System.out.println(rightType.getName().equals("int"));
+        System.out.println("leftT array?: " + leftType.isArray());
+        System.out.println("leftT vararg?: " + leftType.getName().equals("int..."));
+        System.out.println("rightT int?: " + rightType.getName().equals("int"));
 
         if((leftType.isArray() || leftType.getName().equals("int...")) && rightType.getName().equals("int")) {
             return null;
         }
 
+        /*if (node.getChild(0).getKind().equals(Kind.BOOL_OP) || node.getChild(0).getKind().equals(Kind.BINARY_EXPR)) {
+
+        }*/
+        System.out.println("fodeu");
+        System.out.println("left: " + node.getChild(0));
+        System.out.println(leftType);
+        System.out.println("right: " + node.getChild(1));
+        System.out.println(rightType);
         var message = String.format("Variable '%s' does not exist - arr_arridxvisit", node);
         addReport(Report.newError(
                 Stage.SEMANTIC,

@@ -34,6 +34,8 @@ public class TypeUtils {
         final Kind kind = Kind.fromString(expr.getKind());
 
         return switch (kind) {
+            case BOOL_OP -> getBoolExprType(expr);
+            case NOT_OP-> new Type(BOOL_TYPE_NAME, false);
             case BINARY_EXPR -> getBinExprType(expr);
             case VAR_REF_EXPR -> getVarExprType(expr, table);
             case BOOL -> new Type(BOOL_TYPE_NAME, false);
@@ -146,15 +148,26 @@ public class TypeUtils {
     }
 
     private static Type getBinExprType(JmmNode binaryExpr) {
-        // TODO: Simple implementation that needs to be expanded
 
         String operator = binaryExpr.get("op");
 
         return switch (operator) {
-            case "+", "*", "-", "/" ->
+            case "+", "*", "-", "/", "<", ">" ->
                     new Type(INT_TYPE_NAME, false); //todo(goncalo): added - and / ask where tf < and > r and how this func is used
             default ->
                     throw new RuntimeException("Unknown operator '" + operator + "' of expression '" + binaryExpr + "'");
+        };
+    }
+
+    private static Type getBoolExprType(JmmNode boolExpr) {
+
+        String operator = boolExpr.get("op");
+
+        return switch (operator) {
+            case "&&", "||" ->
+                    new Type(BOOL_TYPE_NAME, false);
+            default ->
+                    throw new RuntimeException("Unknown operator '" + operator + "' of expression '" + boolExpr + "'");
         };
     }
 
