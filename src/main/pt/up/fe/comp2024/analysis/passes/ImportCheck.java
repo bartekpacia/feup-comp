@@ -13,6 +13,8 @@ import pt.up.fe.comp2024.ast.NodeUtils;
 import pt.up.fe.comp2024.ast.TypeUtils;
 import pt.up.fe.specs.util.SpecsCheck;
 
+import java.util.Collections;
+
 public class ImportCheck extends AnalysisVisitor {
     private String currentMethod;
 

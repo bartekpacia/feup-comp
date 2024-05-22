@@ -11,21 +11,65 @@ import pt.up.fe.comp2024.ast.NodeUtils;
 import pt.up.fe.comp2024.ast.TypeUtils;
 import pt.up.fe.specs.util.SpecsCheck;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * Checks if the type of the expression in a return statement is compatible with the method return type.
  *
  * @author JBispo
  */
-public class UndeclaredVariable extends AnalysisVisitor {
+public class UndeclaredCheck extends AnalysisVisitor {
 
     private String currentMethod;
 
     @Override
     public void buildVisitor() {
+        //addVisit(Kind.IMPORT_DECL, this::visitImportDecl);
+        addVisit(Kind.CLASS_DECL, this::visitClassDecl);
         addVisit(Kind.METHOD_DECL, this::visitMethodDecl);
         addVisit(Kind.ID_USE_EXPR, this::visitIDUseExpr);
         addVisit(Kind.BINARY_EXPR, this::visitOp);
         addVisit(Kind.RETURN_STMT, this::visitReturnStmt);
+    }
+
+    private Void visitImportDecl(JmmNode node, SymbolTable table) {
+        System.out.println();
+
+
+        var message = String.format("Import '%s' does not exist or is duplicated - undv_dupimportvisit", node);
+        addReport(Report.newError(
+                Stage.SEMANTIC,
+                NodeUtils.getLine(node),
+                NodeUtils.getColumn(node),
+                message,
+                null)
+        );
+        return null;
+    }
+
+    private Void visitClassDecl(JmmNode node, SymbolTable table) {
+        System.out.println("Printing fields");
+        if(table.getFields().isEmpty()) return null;
+        List<String> fieldNames = new ArrayList<>();
+        for (var field : table.getFields()) {
+            fieldNames.add(field.getName());
+        }
+
+        for (var field : table.getFields()) {
+            if(Collections.frequency(fieldNames, field.getName())==1) return null;
+        }
+
+        var message = String.format("Variable '%s' does not exist or is duplicated - undv_dupfieldvisit", node);
+        addReport(Report.newError(
+                Stage.SEMANTIC,
+                NodeUtils.getLine(node),
+                NodeUtils.getColumn(node),
+                message,
+                null)
+        );
+        return null;
     }
 
     private Void visitIDUseExpr(JmmNode node, SymbolTable table) {
@@ -94,25 +138,32 @@ public class UndeclaredVariable extends AnalysisVisitor {
         } else if (returnVar.getKind().equals("IntegerLiteral")) {
             return null;
         } else if (returnVar.getKind().equals("Identifier")) {
-                SpecsCheck.checkNotNull(currentMethod, () -> "Expected current method to be set");
+            SpecsCheck.checkNotNull(currentMethod, () -> "Expected current method to be set");
 
-                // Var is a field, return
-                if (table.getFields().stream()
-                        .anyMatch(param -> param.getName().equals(returnVar.get("id")))) {
-                    return null;
-                }
+            // Var is a field, return
+            if(Collections.frequency(table.getFields(),returnVar.get("id")) == 1) return null;
+            /*if (table.getFields().stream()
+                    .anyMatch(param -> param.getName().equals(returnVar.get("id")))) {
+                return null;
+            }*/
 
-                // Var is a parameter, return
-                if (table.getParameters(currentMethod).stream()
-                        .anyMatch(param -> param.getName().equals(returnVar.get("id")))) {
-                    return null;
-                }
+            // Var is a parameter, return
+            if(Collections.frequency(table.getParameters(currentMethod), returnVar.get("id")) == 1) return null;
+            /*if (table.getParameters(currentMethod).stream()
+                    .anyMatch(param -> param.getName().equals(returnVar.get("id")))) {
+                return null;
+            }*/
+            List<String> locName = new ArrayList<>();
+            for (var loc : table.getLocalVariables(currentMethod)) {
+                locName.add(loc.getName());
+            }
 
-                // Var is a declared variable, return
-                if (table.getLocalVariables(currentMethod).stream()
-                        .anyMatch(varDecl -> varDecl.getName().equals(returnVar.get("id")))) {
-                    return null;
-                }
+            // Var is a declared variable, return
+            if(Collections.frequency(locName, returnVar.get("id")) == 1) return null;
+            /*if (table.getLocalVariables(currentMethod).stream()
+                    .anyMatch(varDecl -> varDecl.getName().equals(returnVar.get("id")))) {
+                return null;
+            }*/
         } else if (returnVar.getKind().equals("ArrayIndex") ) {
             return null;
         }
@@ -132,11 +183,11 @@ public class UndeclaredVariable extends AnalysisVisitor {
     private Void visitMethodDecl(JmmNode method, SymbolTable table) {
         currentMethod = method.get("name");
         method.toTree();
-        for (var tableMethod : table.getMethods()) {
-            if (tableMethod.equals(currentMethod)) {
-                return null;
-            }
+        int count  = Collections.frequency(table.getMethods(), currentMethod);
+        if(count == 1) {
+            return null;
         }
+
 
         var message = String.format("Variable '%s' does not exist - undv_methodvisit", method.getChild(0));
         addReport(Report.newError(
