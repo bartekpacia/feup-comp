@@ -31,6 +31,8 @@ public enum Kind {
     VARARG,
     ID_USE_EXPR, // TODO(bartek): Rename to METHOD_CALL_EXPR
     EXPRESSION_STMT, // TODO(bartek): Rename to EXPR
+    WHILE_STMT,
+    IF_ELSE_STMT,
     NEW_OBJECT;
 
 

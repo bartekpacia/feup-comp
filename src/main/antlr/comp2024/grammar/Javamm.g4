@@ -94,7 +94,8 @@ stmt
     | 'while' '(' expr ')' stmt #WhileStmt
     | expr ';' #ExpressionStmt
     | id=ID '=' expr ';' #AssignStmt
-    | id=ID '[' expr ']' '=' expr ';' #ArrayAssignStmt
+    | expr '=' expr ';' #ArrayAssignStmt
+    //| id=ID '[' expr ']' '=' expr ';' #ArrayAssignStmt
     ;
 
 ifStatment

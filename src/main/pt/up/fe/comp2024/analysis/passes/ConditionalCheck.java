@@ -17,8 +17,8 @@ public class ConditionalCheck extends AnalysisVisitor {
 
     @Override
     public void buildVisitor() {
-        addVisit("WhileStmt", this::WhileStmtAccess);
-        addVisit("IfElseStmt", this::visitIfElseCondition);
+        addVisit(Kind.WHILE_STMT, this::WhileStmtAccess);
+        addVisit(Kind.IF_ELSE_STMT, this::visitIfElseCondition);
         addVisit(Kind.METHOD_DECL, this::dealWithMethod);
     }
 
