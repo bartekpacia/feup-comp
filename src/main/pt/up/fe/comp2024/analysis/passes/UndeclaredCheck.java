@@ -107,20 +107,19 @@ public class UndeclaredCheck extends AnalysisVisitor {
     }
 
     private Void visitOp(JmmNode op, SymbolTable table) {
+        System.out.println("undvop");
         final JmmNode firstOperand = op.getChild(0);
         final JmmNode secondOperand = op.getChild(1);
-        // Check if operand types are the same
-        {
-            final Type firstOperandType = TypeUtils.getExprType(firstOperand, table);
-            final Type secondOperandType = TypeUtils.getExprType(secondOperand, table);
 
-                final boolean firstOperandTypeOk = firstOperandType.getName().equals("int") || firstOperandType.getName().equals("int[]");
-                final boolean secondOperandTypeOk = secondOperandType.getName().equals("int") || firstOperandType.getName().equals("int[]");
-                final boolean sameOperandTypes = firstOperandTypeOk && secondOperandTypeOk;
-                if (sameOperandTypes) {
-                    return null;
-            }
-        }
+        // Check if operand types are the same
+        final Type firstOperandType = TypeUtils.getExprType(firstOperand, table);
+        final Type secondOperandType = TypeUtils.getExprType(secondOperand, table);
+        final boolean firstOperandTypeOk = firstOperandType.getName().equals("int") || firstOperandType.getName().equals("int[]");
+        final boolean secondOperandTypeOk = secondOperandType.getName().equals("int") || secondOperandType.getName().equals("int[]");
+        final boolean sameOperandTypes = firstOperandTypeOk && secondOperandTypeOk;
+
+        if (sameOperandTypes) return null;
+
 
         var message = String.format("Variable '%s' does not exist - undv_opvisit", op);
         addReport(Report.newError(
