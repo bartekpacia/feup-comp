@@ -23,7 +23,7 @@ public enum Kind {
     BOOL,
     NOT_OP,
     INTEGER_LITERAL,
-    LEN_CHECK_OP,
+    LEN_CHECK_EXPR,
     NEW_INT_ARR,
     VAR_REF_EXPR,
     IDENTIFIER,

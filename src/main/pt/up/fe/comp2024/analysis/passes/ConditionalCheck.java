@@ -66,8 +66,10 @@ public class ConditionalCheck extends AnalysisVisitor {
             if(child.getKind().equals("ElseStatment")){
                 // Get the first child of the else statement (which should be either a block or null)
                 JmmNode elseBlock = child.getChild(0);
-                if (elseBlock != null && child.getChild(0).getChildren().isEmpty()) {
-                    var message = String.format("Nothing in the else block");
+                System.out.println("child: " + child);
+                System.out.println("else block: " + elseBlock);
+                if (elseBlock == null /*&& child.getChild(0).getChildren().isEmpty()*/) {
+                    var message = String.format("Else block empty on '%s' does not exist - condc_ifelsevisit", node);
                     addReport(Report.newError(Stage.SEMANTIC, 5, 5, message, null));
                     return null;
                 }
