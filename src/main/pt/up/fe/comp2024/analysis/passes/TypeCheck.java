@@ -200,6 +200,7 @@ public class TypeCheck extends AnalysisVisitor {
         final boolean isBooleanLiteral = returnVar.getKind().equals("Bool");
         final boolean isIdentifier = returnVar.getKind().equals("Identifier");
         final boolean isArrayIndex = returnVar.getKind().equals("ArrayIndex");
+        final boolean isMethodCall = returnVar.getKind().equals("IdUseExpr");
         final boolean isReturnTypeInt = table.getReturnType(currentMethod).getName().equals("int");
         final boolean isReturnTypeBool = table.getReturnType(currentMethod).getName().equals("boolean");
 
@@ -209,6 +210,9 @@ public class TypeCheck extends AnalysisVisitor {
             return null;
         } else if (isArrayIndex) {
             return null; }
+        else if (isMethodCall) {
+            return null;
+        }
 
         var message = String.format("Variable '%s' does not exist - type_retpvisit", stmt.getChild(0));
         addReport(Report.newError(

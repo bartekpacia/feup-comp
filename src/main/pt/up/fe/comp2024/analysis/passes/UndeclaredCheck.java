@@ -132,6 +132,7 @@ public class UndeclaredCheck extends AnalysisVisitor {
     }
     private Void visitReturnStmt(JmmNode stmt, SymbolTable table) {
         JmmNode returnVar = stmt.getChild(0);
+
         if(returnVar.getKind().equals("Bool")) {
             return null;
         } else if (returnVar.getKind().equals("IntegerLiteral")) {
@@ -157,6 +158,12 @@ public class UndeclaredCheck extends AnalysisVisitor {
             if(Collections.frequency(locName, returnVar.get("id")) == 1) return null;
         } else if (returnVar.getKind().equals("ArrayIndex") ) {
             return null;
+        } else if(returnVar.getKind().equals("IdUseExpr")) {
+            for (var method : table.getMethods()) {
+                if (method.equals(returnVar.get("name"))) {
+                    return null;
+                }
+            }
         }
 
         var message = String.format("Variable '%s' does not exist - undv_retvisit", stmt.getChild(0));
