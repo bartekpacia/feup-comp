@@ -22,8 +22,7 @@ public class JmmAnalysisImpl implements JmmAnalysis {
                 new TypeCheck(),
                 new ArrayCheck(),
                 new ConditionalCheck(),
-                new ImportCheck(),
-                new VarArgCheck()
+                new ImportCheck()
         );
     }
 

@@ -58,7 +58,26 @@ public class TypeCheck extends AnalysisVisitor {
     private Void visitMethodDecl(JmmNode method, SymbolTable table) {
         currentMethodNode = method;
         currentMethod = method.get("name");
-        if (method.get("isStatic").equals("true") && !method.get("name").equals("main")) {
+
+        final var params = table.getParameters(currentMethod);
+        final var lastIdx = params.size() - 1;
+
+        for (var param : params) {
+            var paramType = param.getType().getName();
+            if ((params.get(lastIdx) != param) && (paramType.equals("int..."))) {
+                var message = String.format("Variable '%s' does not exist - type_vararg_methodvisit", method);
+                addReport(Report.newError(
+                        Stage.SEMANTIC,
+                        NodeUtils.getLine(method),
+                        NodeUtils.getColumn(method),
+                        message,
+                        null)
+                );
+            }
+        }
+
+        //Checks if the method is static and if it is and its not main, returns error
+        if (method.get("isStatic").equals("true") && !currentMethod.equals("main")) {
             var message = String.format("Variable '%s' does not exist - type_notmaistaticnvisit", method);
             addReport(Report.newError(
                     Stage.SEMANTIC,
@@ -69,6 +88,40 @@ public class TypeCheck extends AnalysisVisitor {
             );
             return null;
         }
+
+        //Checks num of params recieved
+        if (method.getChildren().size()-1 < params.size()) {
+            var message = String.format("Method '%s' has been given less args than predicted - type_notmaistaticnvisit", method);
+            addReport(Report.newError(
+                    Stage.SEMANTIC,
+                    NodeUtils.getLine(method),
+                    NodeUtils.getColumn(method),
+                    message,
+                    null)
+            );
+            return null;
+        }
+
+        //Checks if the types of the params are correct
+        for(int i = 0; i < table.getParameters(currentMethod).size(); i++) {
+            System.out.println("param in table: " + table.getParameters(currentMethod).get(i).getType().getName());
+            System.out.println("param recieved: " + method.getChildren().get(i+1).getChild(0).get("name"));
+            if(!table.getParameters(currentMethod).get(i).getType().getName().equals(method.getChildren().get(i+1).getChild(0).get("name"))) {
+                if(table.getParameters(currentMethod).get(i).getType().getName().equals("int...") && method.getChildren().get(i+1).getChild(0).get("name").equals("int")) {
+                    return null;
+                }
+                var message = String.format("Variable '%s' does not exist - type_notmaistaticnvisit", method);
+                addReport(Report.newError(
+                        Stage.SEMANTIC,
+                        NodeUtils.getLine(method),
+                        NodeUtils.getColumn(method),
+                        message,
+                        null)
+                );
+                return null;
+            }
+        }
+
         return null;
     }
 
