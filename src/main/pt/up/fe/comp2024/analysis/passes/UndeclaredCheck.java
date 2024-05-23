@@ -175,12 +175,20 @@ public class UndeclaredCheck extends AnalysisVisitor {
 
     private Void visitMethodDecl(JmmNode method, SymbolTable table) {
         currentMethod = method.get("name");
+        boolean dupParam = false;
+        boolean dupLocal = false;
         method.toTree();
         int count  = Collections.frequency(table.getMethods(), currentMethod);
         if(count == 1) {
-            return null;
+            for(var param : table.getParameters(currentMethod)) {
+                if(Collections.frequency(table.getParameters(currentMethod), param) > 1) dupParam = true;
+            }
+            for (var local : table.getLocalVariables(currentMethod)){
+                if(Collections.frequency(table.getLocalVariables(currentMethod), local) > 1) dupLocal = true;
+            }
         }
 
+        if(count == 1 && !dupParam && !dupLocal) return null;
 
         var message = String.format("Variable '%s' does not exist - undv_methodvisit", method.getChild(0));
         addReport(Report.newError(
