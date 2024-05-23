@@ -7,6 +7,7 @@ import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp2024.ast.NodeUtils;
 import pt.up.fe.comp2024.ast.TypeUtils;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static pt.up.fe.comp2024.ast.Kind.*;
@@ -43,14 +44,8 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     private String visitExpression(JmmNode node, Void unused) {
         final OllirExprResult exprResult = exprVisitor.visit(node.getChild(0));
 
-        final var code = new StringBuilder();
-        code.append(exprResult.getComputation());
-
-        if (!exprResult.getCode().isEmpty()) {
-            code.append(exprResult.getCode()).append(END_STMT);
-        }
-
-        return code.toString();
+        // We purposefully ignore exprResult.code
+        return exprResult.getComputation();
     }
 
     private String visitAssignStmt(JmmNode node, Void unused) {
@@ -63,7 +58,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         // OllirExprResult.code references temporaries from OllirExprResult.computation, so
         // computation must be executed first.
-        // code.append(variableName.getComputation());
         code.append(exprResult.getComputation());                           // tmp0.i32 :=.i32 a.i32 +.i32 b.i32;
 
         // The statement has the same type as the type of variableName.
@@ -240,7 +234,10 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     }
 
     private String visitImport(JmmNode node, Void unused) {
-        return "import " + node.get("ID") + ";\n";
+        final List<String> names = node.getObjectAsList("name", String.class);
+        final String name = String.join(".", names);
+
+        return "import " + name + ";\n";
     }
 
     /**

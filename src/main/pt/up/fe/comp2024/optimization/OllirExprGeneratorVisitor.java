@@ -136,9 +136,6 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
             default -> throw new IllegalStateException("Invalid first child node of a method");
         };
 
-        final StringBuilder computation = new StringBuilder();
-        final String code = OptUtils.getTemp() + ollirType;
-
         final String invocation;
         {
             final List<String> actuals = node.getChildrenStream().skip(1).map(child -> visit(child).getCode()).toList();
@@ -159,19 +156,22 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         // First line is computation.
         // Second line is code.
 
-        computation.append(code);                                // tmp0.i32
-        computation.append(SPACE).append(ASSIGN).append(SPACE);  // :=
-        computation.append(ollirType).append(SPACE);             // .i32
-        computation.append(invocation).append(ollirType);        // invokevirtual(this, "constInstr").i32
-        computation.append(END_STMT);
+        final StringBuilder computation = new StringBuilder();
+        final String code = OptUtils.getTemp() + ollirType;
 
         if (ollirType.equals(".V")) {
             // TODO(bartek): This is not the prettiest way to handle this case, but hey, it works.
-            return new OllirExprResult("", invocation + ollirType + END_STMT);
+            computation.append(invocation).append(ollirType);        // invokevirtual(this, "constInstr").i32
+            computation.append(END_STMT);
+        } else {
+            computation.append(code);                                // tmp0.i32
+            computation.append(SPACE).append(ASSIGN).append(SPACE);  // :=
+            computation.append(ollirType).append(SPACE);             // .i32
+            computation.append(invocation).append(ollirType);        // invokevirtual(this, "constInstr").i32
+            computation.append(END_STMT);
         }
 
         return new OllirExprResult(code, computation);
-
     }
 
     private OllirExprResult visitNewObjectExpr(JmmNode node, Void unused) {

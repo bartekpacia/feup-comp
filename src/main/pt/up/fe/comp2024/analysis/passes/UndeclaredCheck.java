@@ -74,15 +74,14 @@ public class UndeclaredCheck extends AnalysisVisitor {
     }
 
     private Void visitIDUseExpr(JmmNode node, SymbolTable table) {
-        for (var method : table.getMethods()) {
+        for (final var method : table.getMethods()) {
             if (method.equals(node.get("name"))) {
                 return null;
             }
         }
 
         final var type = TypeUtils.getExprType(node.getChild(0), table);
-        final var importedName = node.getChild(0).get("id");
-        for (var tableImport : table.getImports()) {
+        for (final var tableImport : table.getImports()) {
             if (tableImport.equals(table.getSuper()) || tableImport.equals(type.getName())) {
                 return null;
             }
