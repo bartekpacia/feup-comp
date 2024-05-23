@@ -127,7 +127,9 @@ public class TypeUtils {
                 // Search for identifier in file's imports
                 final List<String> imports = new ArrayList<>(table.getImports());
                 for (final String imp : imports) {
-                    if (imp.equals(ident)) {
+                    final var lastDotIdx = imp.lastIndexOf('.');
+                    final var importedIdentifier = imp.substring(lastDotIdx + 1);
+                    if (importedIdentifier.equals(ident)) {
                         // TODO(bartek): It's possible that it should not be VOID_TYPE_NAME, but an empty string.
                         //  No time to verify this though.
                         localType = new Type(VOID_TYPE_NAME, false);
