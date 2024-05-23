@@ -11,6 +11,8 @@ import pt.up.fe.comp2024.ast.NodeUtils;
 import pt.up.fe.comp2024.ast.TypeUtils;
 import pt.up.fe.specs.util.SpecsCheck;
 
+import javax.swing.*;
+
 public class TypeCheck extends AnalysisVisitor {
 
     private String currentMethod;
@@ -59,6 +61,7 @@ public class TypeCheck extends AnalysisVisitor {
         currentMethodNode = method;
         currentMethod = method.get("name");
 
+        //deal with varargs
         final var params = table.getParameters(currentMethod);
         final var lastIdx = params.size() - 1;
 
@@ -104,13 +107,14 @@ public class TypeCheck extends AnalysisVisitor {
 
         //Checks if the types of the params are correct
         for(int i = 0; i < table.getParameters(currentMethod).size(); i++) {
-            System.out.println("param in table: " + table.getParameters(currentMethod).get(i).getType().getName());
-            System.out.println("param recieved: " + method.getChildren().get(i+1).getChild(0).get("name"));
+            table.print();
+            System.out.println("param in table: " + table.getParameters(currentMethod).get(i).getType());
+            System.out.println("param recieved: " + method.getChildren().get(i+1).getChild(0));
             if(!table.getParameters(currentMethod).get(i).getType().getName().equals(method.getChildren().get(i+1).getChild(0).get("name"))) {
-                if(table.getParameters(currentMethod).get(i).getType().getName().equals("int...") && method.getChildren().get(i+1).getChild(0).get("name").equals("int")) {
+                /*if(table.getParameters(currentMethod).get(i).getType().getName().equals("int") && method.getChildren().get(i+1).getChild(0).get("name").equals("int")) {
                     return null;
-                }
-                var message = String.format("Variable '%s' does not exist - type_notmaistaticnvisit", method);
+                }*/
+                var message = String.format("Method '%s' does not have the correct param types - type_notmaistaticnvisit", method);
                 addReport(Report.newError(
                         Stage.SEMANTIC,
                         NodeUtils.getLine(method),
