@@ -1,5 +1,6 @@
 package pt.up.fe.comp2024.optimization;
 
+import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.AJmmVisitor;
@@ -50,24 +51,57 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
     private String visitAssignStmt(JmmNode node, Void unused) {
         final String variableName = node.get("id");
-
         final JmmNode expressionNode = node.getChild(0);
-        final OllirExprResult exprResult = exprVisitor.visit(expressionNode);
+        final OllirExprResult rhsExprResult = exprVisitor.visit(expressionNode);
+        final boolean insideStaticMethod = node.getAncestor(METHOD_DECL)
+                .map(method -> method.get("isStatic"))
+                .map(Boolean::parseBoolean)
+                .orElseThrow();
+        final String className = node.getAncestor(CLASS_DECL)
+                .map(classNode -> classNode.get("name"))
+                .orElseThrow();
 
         StringBuilder code = new StringBuilder();
 
+        for (final Symbol field : table.getFields()) {
+            if (insideStaticMethod || !field.getName().equals(variableName)) {
+                continue;
+            }
+
+            // Example code we want to generate:
+            //  putfield(this, intField.i32, x.i32).V;
+            // Example computation we want to generate:
+            //  x.i32 :=.i32 10.i32;
+
+            final Type type = TypeUtils.getExprType(expressionNode, table);
+            final String ollirType = OptUtils.toOllirType(type);
+
+            code
+                    .append("putfield")
+                    .append("(")
+                    .append("this.").append(className).append(", ")
+                    .append(variableName).append(ollirType).append(", ")
+                    .append(rhsExprResult.getCode())
+                    .append(")")
+                    .append(ollirType)
+                    .append(END_STMT);
+
+            return code.toString();
+        }
+
+
         // OllirExprResult.code references temporaries from OllirExprResult.computation, so
         // computation must be executed first.
-        code.append(exprResult.getComputation());                           // tmp0.i32 :=.i32 a.i32 +.i32 b.i32;
+        code.append(rhsExprResult.getComputation());                          // tmp0.i32 :=.i32 a.i32 +.i32 b.i32;
 
         // The statement has the same type as the type of variableName.
         final Type type = TypeUtils.getExprType(expressionNode, table);
         final String ollirType = OptUtils.toOllirType(type);
 
         // For example: c.i32 := .i32 tmp0.i32;
-        code.append(variableName).append(ollirType).append(SPACE);          // c.i32
-        code.append(ASSIGN);                                                // :=
-        code.append(ollirType).append(SPACE).append(exprResult.getCode());  // .i32 tmp0.i32
+        code.append(variableName).append(ollirType).append(SPACE);            // c.i32
+        code.append(ASSIGN);                                                  // :=
+        code.append(ollirType).append(SPACE).append(rhsExprResult.getCode()); // .i32 tmp0.i32
 
         code.append(END_STMT);
 
