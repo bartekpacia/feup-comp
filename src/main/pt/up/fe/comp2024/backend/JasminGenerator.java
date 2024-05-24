@@ -85,7 +85,7 @@ public class JasminGenerator {
         ollirClass.getFields().forEach(field -> {
             code.append(".field ");
             System.out.println("fam: " + field.getFieldAccessModifier().name().toLowerCase());
-            code.append(field.getFieldAccessModifier().name().toLowerCase().equals("default") ? "" : field.getFieldAccessModifier().name().toLowerCase()+" ");
+            code.append(field.getFieldAccessModifier().name().toLowerCase().equals("default") ? "" : field.getFieldAccessModifier().name().toLowerCase() + " ");
             code.append(field.getFieldName()).append(" ");
             code.append(JasminUtils.toJasminType(field.getFieldType())).append(NL).append(NL);
         });
@@ -292,8 +292,18 @@ public class JasminGenerator {
 
             }
             case invokestatic -> {
-                // final String classname = ((ClassType) callInst.getCaller().getType()).getName();
                 var classname = ((Operand) callInst.getCaller()).getName();
+                // If this classname is imported, use the fully-qualified name
+                for (final var fullImportPath : ollirResult.getOllirClass().getImports()) {
+                    System.out.println(fullImportPath);
+                    final var importParts = fullImportPath.split("\\.");
+                    if (importParts.length > 1) {
+                        final var importedClass = importParts[importParts.length - 1];
+                        if (importedClass.equals(classname)) {
+                            classname = fullImportPath.replace(".", "/");
+                        }
+                    }
+                }
 
                 final String methodname = ((LiteralElement) callInst.getMethodName()).getLiteral().replace("\"", "");
                 final String descriptor = "(" + JasminUtils.argumentsToDescriptor(callInst.getArguments()) + ")V";
