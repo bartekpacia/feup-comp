@@ -77,6 +77,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             final String ollirType = OptUtils.toOllirType(type);
 
             code
+                    .append(rhsExprResult.getComputation())
                     .append("putfield")
                     .append("(")
                     .append("this.").append(className).append(", ")

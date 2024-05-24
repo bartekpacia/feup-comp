@@ -7,7 +7,7 @@ class CompileExtra {
 
     }
 
-    public static int foo() {
+    public int foo() {
         // Verify that repeated method calls work
 
         int a;
