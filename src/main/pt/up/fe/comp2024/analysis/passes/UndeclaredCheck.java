@@ -80,6 +80,7 @@ public class UndeclaredCheck extends AnalysisVisitor {
             }
         }
 
+
         final var type = TypeUtils.getExprType(node.getChild(0), table);
         for (final var tableImport : table.getImports()) {
             if (tableImport.equals(table.getSuper()) || tableImport.equals(type.getName())) {

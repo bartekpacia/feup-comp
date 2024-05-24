@@ -12,6 +12,7 @@ import pt.up.fe.comp2024.ast.TypeUtils;
 import pt.up.fe.specs.util.SpecsCheck;
 
 import javax.swing.*;
+import java.util.Collections;
 
 public class TypeCheck extends AnalysisVisitor {
 
@@ -22,11 +23,65 @@ public class TypeCheck extends AnalysisVisitor {
     public void buildVisitor() {
         addVisit(Kind.METHOD_DECL, this::visitMethodDecl);
         addVisit(Kind.BINARY_EXPR, this::visitArithmeticOp);
+        addVisit(Kind.ID_USE_EXPR, this::visitIdUseExpr);
         addVisit(Kind.BOOL_OP, this::visitCondOp);
         addVisit(Kind.NOT_OP, this::visitCondOp);
         addVisit(Kind.ASSIGN_STMT, this::visitAssignStmt);
         addVisit(Kind.RETURN_STMT, this::visitReturnStmt);
         addVisit(Kind.VAR_REF_EXPR, this::visitVarRefExpr);
+    }
+
+    private Void visitIdUseExpr(JmmNode node, SymbolTable table) {
+        if(!(Collections.frequency(table.getMethods(),node.get("name")) == 1)) {
+            return null;
+        }
+
+        var params = table.getParameters(node.get("name"));
+        var numParamsRec = 0;
+
+        //Checks num of params recieved
+        System.out.println("iduseexpr: " + node);
+        for (int i = 0; i <node.getChildren().size(); i++){
+            if (i != 0) {numParamsRec++;}
+        }
+
+        if (numParamsRec < params.size()) {
+            var message = String.format("Method '%s' has been given less args than predicted - type_notmaistaticnvisit", node);
+            addReport(Report.newError(
+                    Stage.SEMANTIC,
+                    NodeUtils.getLine(node),
+                    NodeUtils.getColumn(node),
+                    message,
+                    null)
+            );
+            return null;
+        }
+
+
+        for(int i = 0; i< table.getParameters(node.get("name")).size(); i++){
+            System.out.println("param: " + table.getParameters(node.get("name")).get(i).getType());
+            System.out.println("node: " + TypeUtils.getExprType(node.getChild(i+1),table));
+            if(!(table.getParameters(node.get("name")).get(i).getType().getName().equals(TypeUtils.getExprType(node.getChild(i+1),table).getName()) &&
+                    table.getParameters(node.get("name")).get(i).getType().isArray() == TypeUtils.getExprType(node.getChild(i+1),table).isArray())) {
+                if(table.getParameters(node.get("name")).get(i).getType().getName().equals("int...") && TypeUtils.getExprType(node.getChild(i+1),table).getName().equals("int")){
+                    return null;
+                }
+                var message = String.format("Method '%s' has been given args with wrong types - type_notmaistaticnvisit", node);
+                addReport(Report.newError(
+                        Stage.SEMANTIC,
+                        NodeUtils.getLine(node),
+                        NodeUtils.getColumn(node),
+                        message,
+                        null)
+                );
+                return null;
+            }
+
+
+        }
+
+
+        return null;
     }
 
     private Void visitVarRefExpr(JmmNode node, SymbolTable table) {
@@ -90,40 +145,6 @@ public class TypeCheck extends AnalysisVisitor {
                     null)
             );
             return null;
-        }
-
-        //Checks num of params recieved
-        if (method.getChildren().size()-1 < params.size()) {
-            var message = String.format("Method '%s' has been given less args than predicted - type_notmaistaticnvisit", method);
-            addReport(Report.newError(
-                    Stage.SEMANTIC,
-                    NodeUtils.getLine(method),
-                    NodeUtils.getColumn(method),
-                    message,
-                    null)
-            );
-            return null;
-        }
-
-        //Checks if the types of the params are correct
-        for(int i = 0; i < table.getParameters(currentMethod).size(); i++) {
-            table.print();
-            System.out.println("param in table: " + table.getParameters(currentMethod).get(i).getType());
-            System.out.println("param recieved: " + method.getChildren().get(i+1).getChild(0));
-            if(!table.getParameters(currentMethod).get(i).getType().getName().equals(method.getChildren().get(i+1).getChild(0).get("name"))) {
-                /*if(table.getParameters(currentMethod).get(i).getType().getName().equals("int") && method.getChildren().get(i+1).getChild(0).get("name").equals("int")) {
-                    return null;
-                }*/
-                var message = String.format("Method '%s' does not have the correct param types - type_notmaistaticnvisit", method);
-                addReport(Report.newError(
-                        Stage.SEMANTIC,
-                        NodeUtils.getLine(method),
-                        NodeUtils.getColumn(method),
-                        message,
-                        null)
-                );
-                return null;
-            }
         }
 
         return null;
