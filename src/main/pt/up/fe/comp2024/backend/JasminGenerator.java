@@ -244,16 +244,12 @@ public class JasminGenerator {
 
                 // Find matching method by name. Java-- does not support method overloading.
                 // TODO(bartek): Support imported and inherited methods (i.e. methods not present in ClassUnit)
-                final Method method = ollirResult.getOllirClass().getMethods().stream()
-                        .filter(m -> m.getMethodName().equals(methodname))
-                        .findFirst().orElseThrow();
 
                 final var caller = (Operand) callInst.getCaller();
                 final int objectrefReg = currentMethod.getVarTable().get(caller.getName()).getVirtualReg();
                 code.append("aload ").append(objectrefReg).append(NL);
-
                 // Push operands onto the stack from the registers.
-                for (final Element element : method.getParams()) {
+                for (final Element element : callInst.getArguments()) {
                     final Operand operand = (Operand) element;
                     final int reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
                     code.append(JasminUtils.load(operand.getType().getTypeOfElement(), reg)).append(NL);
@@ -262,12 +258,13 @@ public class JasminGenerator {
                 code.append("invokevirtual ");
                 code.append(classname).append("/").append(methodname);
                 code.append("(");
-                code.append(method.getParams().stream()
+                code.append(callInst.getArguments().stream()
                         .map(p -> JasminUtils.toJasminType(p.getType()))
                         .collect(Collectors.joining())
                 );
                 code.append(")");
-                code.append(JasminUtils.toJasminType(method.getReturnType()));
+                code.append(JasminUtils.toJasminType(callInst.getReturnType()));
+
 
                 code.append(NL);
             }
