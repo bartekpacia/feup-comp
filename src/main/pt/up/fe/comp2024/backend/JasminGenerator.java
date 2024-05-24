@@ -288,10 +288,6 @@ public class JasminGenerator {
             case invokestatic -> {
                 // final String classname = ((ClassType) callInst.getCaller().getType()).getName();
                 var classname = ((Operand) callInst.getCaller()).getName();
-                // If this classname is imported, use the fully qualified name
-                for (final var imp : ollirResult.getSymbolTable().getImports()) {
-                    // System.out.println("DEBUG imp: " + imp);
-                }
 
                 final String methodname = ((LiteralElement) callInst.getMethodName()).getLiteral().replace("\"", "");
                 final String descriptor = "(" + JasminUtils.argumentsToDescriptor(callInst.getArguments()) + ")V";
