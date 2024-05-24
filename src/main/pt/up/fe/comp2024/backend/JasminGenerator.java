@@ -295,7 +295,6 @@ public class JasminGenerator {
                 var classname = ((Operand) callInst.getCaller()).getName();
                 // If this classname is imported, use the fully-qualified name
                 for (final var fullImportPath : ollirResult.getOllirClass().getImports()) {
-                    System.out.println(fullImportPath);
                     final var importParts = fullImportPath.split("\\.");
                     if (importParts.length > 1) {
                         final var importedClass = importParts[importParts.length - 1];
