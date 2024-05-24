@@ -82,6 +82,14 @@ public class JasminGenerator {
         final String superClass = JasminUtils.toJasminSuperclassType(ollirClass.getSuperClass());
         code.append(".super ").append(superClass).append(NL).append(NL);
 
+        ollirClass.getFields().forEach(field -> {
+            code.append(".field ");
+            System.out.println("fam: " + field.getFieldAccessModifier().name().toLowerCase());
+            code.append(field.getFieldAccessModifier().name().toLowerCase().equals("default") ? "" : field.getFieldAccessModifier().name().toLowerCase()+" ");
+            code.append(field.getFieldName()).append(" ");
+            code.append(JasminUtils.toJasminType(field.getFieldType())).append(NL).append(NL);
+        });
+
         // generate a single constructor method
         String defaultConstructor =
                 ".method public <init>()V" + NL +
@@ -197,7 +205,7 @@ public class JasminGenerator {
         code.append(generators.apply(binaryOp.getLeftOperand()));
         code.append(generators.apply(binaryOp.getRightOperand()));
 
-        // apply operation
+        // apply operationComplexArgsFuncCall
         final String op = switch (binaryOp.getOperation().getOpType()) {
             case ADD -> "iadd";
             case MUL -> "imul";
@@ -315,28 +323,30 @@ public class JasminGenerator {
     private String generatePutField(PutFieldInstruction putFieldInst) {
         // TODO(bartek): Implement
         final StringBuilder code = new StringBuilder();
+        final String className = ollirResult.getOllirClass().getClassName();
 
         // Push last operand onto the stack. Last operand is the value.
         final var value = (LiteralElement) putFieldInst.getOperands().get(putFieldInst.getOperands().size() - 1);
-        code.append("bipush ").append(value.getLiteral());
-
+        code.append("aload_0").append(NL);
+        code.append("bipush ").append(value.getLiteral()).append(NL);
+        code.append("putfield ").append(className).append("/").append(putFieldInst.getField().getName()).append(" ").append(JasminUtils.toJasminType(putFieldInst.getField().getType())).append(NL);
         // Example:
         // putfield ClassName/fieldName I
         // code.append("putfield ").append();
 
-        for (final Element operand : putFieldInst.getOperands()) {
+        /*for (final Element operand : putFieldInst.getOperands()) {
             System.out.println("operand: " + operand.toString());
-        }
+        }*/
 
 
         return code.toString();
     }
 
     private String generateGetField(GetFieldInstruction putFieldInst) {
-        // TODO(bartek): Implement
+        final String className = ollirResult.getOllirClass().getClassName();
         final StringBuilder code = new StringBuilder();
-
-
+        code.append("aload_0").append(NL);
+        code.append("getfield ").append(className).append("/").append(putFieldInst.getField().getName()).append(" ").append(JasminUtils.toJasminType(putFieldInst.getField().getType())).append(NL);
         return code.toString();
     }
 }
