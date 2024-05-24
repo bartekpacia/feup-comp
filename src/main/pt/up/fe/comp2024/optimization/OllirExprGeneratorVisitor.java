@@ -10,6 +10,7 @@ import pt.up.fe.comp2024.ast.TypeUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static pt.up.fe.comp2024.ast.Kind.*;
 import static pt.up.fe.comp2024.optimization.OllirTokens.*;
@@ -112,7 +113,6 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
             // Example:
             // t1.i32 := .i32 getfield(this.Structure_fields, a.i32).i32;
 
-            // FIXME(bartekpacia): This "OptUtils.getTemp()" should be also present in "code"
             final var tmp = OptUtils.getTemp();                                     // t1
             computation.append(tmp).append(ollirType);                              // t1.i32
             computation.append(SPACE).append(ASSIGN).append(SPACE);                 // :=
@@ -175,14 +175,15 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         final StringBuilder subcomputations = new StringBuilder();
         final StringBuilder invocation = new StringBuilder();
         {
-            final List<String> computations = node.getChildrenStream().skip(1).map(child -> visit(child).getComputation()).toList();
+            final List<OllirExprResult> results = node.getChildrenStream().skip(1).map(this::visit).toList();
+            final List<String> computations = results.stream().map(OllirExprResult::getComputation).toList();
             for (final var computation : computations) {
                 if (computation.isEmpty()) continue;
                 subcomputations.append(computation);
             }
 
 
-            final List<String> actuals = node.getChildrenStream().skip(1).map(child -> visit(child).getCode()).toList();
+            final List<String> actuals = results.stream().map(OllirExprResult::getCode).toList();
             final List<String> codes = new ArrayList<>();
             codes.add(invocationCode);
             codes.add('"' + methodName + '"');
@@ -207,7 +208,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
 
         if (ollirType.equals(".V")) {
             // TODO(bartek): This is not the prettiest way to handle this case, but hey, it works.
-            computation.append(invocation).append(ollirType);        // invokevirtual(this, "constInstr").i32
+            computation.append(invocation).append(ollirType);        // invokevirtual(this, "constInstr").V
             computation.append(END_STMT);
         } else {
             computation.append(code);                                // tmp0.i32
