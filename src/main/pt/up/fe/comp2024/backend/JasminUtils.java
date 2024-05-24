@@ -56,7 +56,10 @@ public class JasminUtils {
 
                 yield code.toString();
             }
-            case OBJECTREF -> throw new NotImplementedException("ElementType.OBJECTREF");
+            case OBJECTREF -> {
+                final StringBuilder code = new StringBuilder();
+                yield code.append("L").append(ollirType.toString().replace("OBJECTREF(", "").replace(")", "")).append(";").toString();
+            }
             case CLASS -> throw new NotImplementedException("ElementType.CLASS");
             case THIS -> throw new NotImplementedException("ElementType.THIS");
             case STRING -> "Ljava/lang/String;";
