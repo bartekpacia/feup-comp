@@ -5,6 +5,7 @@ import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.ast.PreorderJmmVisitor;
+import pt.up.fe.comp.jmm.ollir.OllirUtils;
 import pt.up.fe.comp2024.ast.TypeUtils;
 
 import java.util.ArrayList;
@@ -96,6 +97,28 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         String id = node.get("id");
         final String methodName = node.getAncestor(METHOD_DECL).map(method -> method.get("name")).orElseThrow();
 
+        final StringBuilder computation = new StringBuilder();
+
+        // Determine if this identifier refers to a class field.
+        for (final var field : table.getFields()) {
+            if (!field.getName().equals(id)) {
+                continue;
+            }
+
+            final String className = node.getAncestor(CLASS_DECL).map(classNode -> classNode.get("name")).orElseThrow();
+            final String ollirType = OptUtils.toOllirType(field.getType());
+
+            // Example:
+            // t1.i32 := .i32 getfield(this.Structure_fields, a.i32).i32;
+
+            computation.append(OptUtils.getTemp()).append(ollirType);                               // t1.i32
+            computation.append(SPACE).append(ASSIGN).append(SPACE);                                 // :=
+            computation.append(ollirType).append(SPACE).append("getfield(");                        // .i32 getfield(this.Structure_fields
+            computation.append("this.").append(className).append(", ");                             // a.i32
+            computation.append(field.getName()).append(ollirType).append(")").append(ollirType);    // ).i32;
+            computation.append(END_STMT);
+        }
+
         // Hacky hack. Search for identifier in method's parameters
         final List<Symbol> params = new ArrayList<>(table.getParameters(methodName));
         for (int i = 0; i < params.size(); i++) {
@@ -103,7 +126,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
 
             // FIXME(bartek): Ugly hack to reference actuals. Working around the need of prefixing with $ and actual's index.
             if (param.getName().equals(id)) {
-                id = "$" + i + "." + id;
+                id = "$" + (i + 1) + "." + id;
                 break;
             }
         }
@@ -111,7 +134,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         final Type type = TypeUtils.getExprType(node, table);
         final String ollirType = OptUtils.toOllirType(type);
         final String code = id + ollirType;
-        return new OllirExprResult(code);
+        return new OllirExprResult(code, computation);
     }
 
     private OllirExprResult visitMethodCallExpr(JmmNode node, Void unused) {
