@@ -250,12 +250,12 @@ public class JasminGenerator {
                 code.append("aload ").append(objectrefReg).append(NL);
                 // Push operands onto the stack from the registers.
                 for (final Element element : callInst.getArguments()) {
-                    if(element instanceof Operand){
+                    if (element instanceof Operand) {
                         final Operand operand = (Operand) element;
                         final int reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
                         code.append(JasminUtils.load(operand.getType().getTypeOfElement(), reg)).append(NL);
                     }
-                    if(element instanceof LiteralElement){
+                    if (element instanceof LiteralElement) {
                         final var literal = ((LiteralElement) element).getLiteral();
                         code.append("ldc ").append(literal).append(NL);
                     }
@@ -305,7 +305,7 @@ public class JasminGenerator {
                 }
 
                 final String methodname = ((LiteralElement) callInst.getMethodName()).getLiteral().replace("\"", "");
-                final String descriptor = "(" + JasminUtils.argumentsToDescriptor(callInst.getArguments()) + ")V";
+                final String descriptor = "(" + JasminUtils.argumentsToDescriptor(callInst.getArguments()) + ")" + JasminUtils.toJasminType(callInst.getReturnType());
 
                 for (final Element element : callInst.getArguments()) {
                     if (element.isLiteral()) {
