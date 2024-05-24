@@ -172,6 +172,8 @@ public class TypeUtils {
     private static Type getVarExprType(JmmNode varRefExpr, SymbolTable table) {
         final String varName = varRefExpr.get("name");
 
+        if(varName.equals("this")) return new Type("this", false);
+
         String currentMethod = varRefExpr.getAncestor(METHOD_DECL).orElseThrow().get("name");
 
         final var fields = table.getFields();
@@ -199,7 +201,7 @@ public class TypeUtils {
             }
         }
 
-        throw new RuntimeException("Variable " + varName + "not found.");
+        throw new RuntimeException("Variable " + varName + " not found.");
     }
 
     public static Type getVarExprAssignType(JmmNode node, SymbolTable table) {
