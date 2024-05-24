@@ -15,15 +15,11 @@ import static pt.up.fe.comp2024.ast.Kind.*;
 
 public class TypeUtils {
 
-    private static final String INT_TYPE_NAME = "int";
-    private static final String VARARG_TYPE_NAME = "int...";
-    private static final String BOOL_TYPE_NAME = "boolean";
-    private static final String VOID_TYPE_NAME = "void";
-    private static final String ARR_INDEX_NAME = "int[]";
-
-    public static String getIntTypeName() {
-        return INT_TYPE_NAME;
-    }
+    public static final String INT_TYPE_NAME = "int";
+    public static final String VARARG_TYPE_NAME = "int...";
+    public static final String BOOL_TYPE_NAME = "boolean";
+    public static final String VOID_TYPE_NAME = "void";
+    public static final String ARR_INDEX_NAME = "int[]";
 
     /**
      * Gets the {@link Type} of an arbitrary expression.
