@@ -96,6 +96,8 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
     private OllirExprResult visitIdentifier(JmmNode node, Void unused) {
         String id = node.get("id");
         final String methodName = node.getAncestor(METHOD_DECL).map(method -> method.get("name")).orElseThrow();
+        final Type type = TypeUtils.getExprType(node, table);
+        final String ollirType = OptUtils.toOllirType(type);
 
         final StringBuilder computation = new StringBuilder();
 
@@ -106,20 +108,25 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
             }
 
             final String className = node.getAncestor(CLASS_DECL).map(classNode -> classNode.get("name")).orElseThrow();
-            final String ollirType = OptUtils.toOllirType(field.getType());
 
             // Example:
             // t1.i32 := .i32 getfield(this.Structure_fields, a.i32).i32;
 
-            computation.append(OptUtils.getTemp()).append(ollirType);                               // t1.i32
-            computation.append(SPACE).append(ASSIGN).append(SPACE);                                 // :=
-            computation.append(ollirType).append(SPACE).append("getfield(");                        // .i32 getfield(this.Structure_fields
-            computation.append("this.").append(className).append(", ");                             // a.i32
-            computation.append(field.getName()).append(ollirType).append(")").append(ollirType);    // ).i32;
+            // FIXME(bartekpacia): This "OptUtils.getTemp()" should be also present in "code"
+            final var tmp = OptUtils.getTemp();                                     // t1
+            computation.append(tmp).append(ollirType);                              // t1.i32
+            computation.append(SPACE).append(ASSIGN).append(SPACE);                 // :=
+            computation.append(ollirType).append(SPACE).append("getfield(");        // .i32 getfield(
+            computation.append("this.").append(className).append(", ");             // this.Structure_fields
+            computation.append(id).append(ollirType).append(")").append(ollirType); // a.i32).i32;
             computation.append(END_STMT);
+
+            final String code = tmp + ollirType;
+            return new OllirExprResult(code, computation);
         }
 
-        // Hacky hack. Search for identifier in method's parameters
+        // Determine if this identifier refers to a method formal parameter.
+        // This is a hacky hack. Search for identifier in method's parameters.
         final List<Symbol> params = new ArrayList<>(table.getParameters(methodName));
         for (int i = 0; i < params.size(); i++) {
             final Symbol param = params.get(i);
@@ -131,8 +138,6 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
             }
         }
 
-        final Type type = TypeUtils.getExprType(node, table);
-        final String ollirType = OptUtils.toOllirType(type);
         final String code = id + ollirType;
         return new OllirExprResult(code, computation);
     }
@@ -167,16 +172,23 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
             default -> throw new IllegalStateException("Invalid first child node of a method");
         };
 
-        final String invocation;
+        final StringBuilder subcomputations = new StringBuilder();
+        final StringBuilder invocation = new StringBuilder();
         {
-            final List<String> actuals = node.getChildrenStream().skip(1).map(child -> visit(child).getCode()).toList();
+            final List<String> computations = node.getChildrenStream().skip(1).map(child -> visit(child).getComputation()).toList();
+            for (final var computation : computations) {
+                if (computation.isEmpty()) continue;
+                subcomputations.append(computation);
+            }
 
+
+            final List<String> actuals = node.getChildrenStream().skip(1).map(child -> visit(child).getCode()).toList();
             final List<String> codes = new ArrayList<>();
             codes.add(invocationCode);
             codes.add('"' + methodName + '"');
             codes.addAll(actuals);
 
-            invocation = String.join(", ", codes) + R_PAREN;
+            invocation.append(String.join(", ", codes) + R_PAREN);
         }
 
         // Example code I want to generate:
@@ -187,8 +199,11 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         // First line is computation.
         // Second line is code.
 
-        final StringBuilder computation = new StringBuilder();
+
         final String code = OptUtils.getTemp() + ollirType;
+
+        final StringBuilder computation = new StringBuilder();
+        computation.append(subcomputations);
 
         if (ollirType.equals(".V")) {
             // TODO(bartek): This is not the prettiest way to handle this case, but hey, it works.
